@@ -10,9 +10,10 @@ use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Middleware\IsAdmin;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\Booking_stadiumController;
+
 Route::get('/', function () {
     return view('home');
+    
 });
 
 
@@ -34,5 +35,3 @@ Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.e
 Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 
-Route::get('/booking', [Booking_stadiumController::class, 'showForm'])->name('booking.form');
-Route::post('/booking', [Booking_stadiumController::class, 'bookField'])->name('booking.submit');

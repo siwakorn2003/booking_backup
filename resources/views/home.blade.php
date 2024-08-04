@@ -27,7 +27,7 @@
                     You are Normal User.
 
                     <a href="calendar">ปฏิทิน</a>
-                    <a href="{{ route('booking.from') }}" class="btn btn-primary">จองสนามฟุตบอล</a>
+                    
 
                 </div>
             </div>
