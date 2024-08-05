@@ -11,6 +11,9 @@ use App\Http\Middleware\IsAdmin;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\ProfileController;
 
+
+
+
 Route::get('/', function () {
     return view('home');
     
@@ -33,5 +36,4 @@ Route::post('/calendar', [CalendarController::class, 'index']);
 //เส้นทางการแก้ไขโปรไฟล์
 Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
 Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
-Route::get('/home', [HomeController::class, 'index'])->name('home');
 
