@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
+    
     <meta charset="UTF-8">
 
     <!-- CSRF Token -->
@@ -76,5 +77,7 @@
             @yield('content')
         </main>
     </div>
+
+    @stack('scripts') <!-- เพิ่มบรรทัดนี้ก่อนปิด </body> -->
 </body>
 </html>

@@ -15,6 +15,10 @@
         "vite": "^5.3.5"
     },
     "dependencies": {
+        "@fullcalendar/core": "^6.1.15",
+        "@fullcalendar/daygrid": "^6.1.15",
+        "@fullcalendar/interaction": "^6.1.15",
+        "@fullcalendar/timegrid": "^6.1.15",
         "chmod": "^0.2.1"
     }
 }
