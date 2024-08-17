@@ -10,7 +10,7 @@ use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Middleware\IsAdmin;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\MemberController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\BorrowingController;
 use App\Http\Controllers\StadiumController;
@@ -41,7 +41,6 @@ Route::put('/profile/update', [ProfileController::class, 'update'])->name('profi
 
 
 Route::resource('stadiums', StadiumController::class);
-// Route::get('/stadiums', [StadiumController::class, 'index'])->name('stadiums.index');
-Route::get('/members', [MemberController::class, 'index'])->name('members.index');
+Route::resource('users', UserController::class);
 Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
 Route::get('/borrowings', [BorrowingController::class, 'index'])->name('borrowings.index');
