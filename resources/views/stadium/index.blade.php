@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+
 <div class="container-fluid mt-4">
     <div class="row justify-content-center">
         <div class="col-12">
@@ -16,9 +17,8 @@
                             <tr>
                                 <th>ชื่อสนาม</th>
                                 <th>ราคา</th>
-                                <th>รูปภาพ</th>
                                 <th>สถานะ</th>
-                                <th>การจัดการ</th>
+                                <th>ช่วงเวลาจอง</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -26,15 +26,20 @@
                             <tr>
                                 <td>{{ $stadium->stadium_name }}</td>
                                 <td>{{ $stadium->stadium_price }} บาท</td>
-                                <td>
-                                    <img src="{{ asset('storage/' . $stadium->stadium_picture) }}" alt="{{ $stadium->stadium_name }}" width="200" class="img-thumbnail">
-                                </td>
+                                
                                 <td>
                                     @if($stadium->stadium_status == 'พร้อมให้บริการ')
                                         <span class="badge bg-success">{{ $stadium->stadium_status }}</span>
                                     @else
                                         <span class="badge bg-danger">{{ $stadium->stadium_status }}</span>
                                     @endif
+                                </td>
+                                <td>
+                                    <div class="d-flex justify-content-between">
+                                        @for ($i = 11; $i <= 17; $i++)
+                                            <button class="btn btn-outline-primary">{{ $i }}:00-{{ $i+1 }}:00</button>
+                                        @endfor
+                                    </div>
                                 </td>
                                 <td>
                                     <a href="{{ route('stadiums.edit', $stadium->id) }}" class="btn btn-warning btn-sm">แก้ไข</a>
@@ -53,4 +58,5 @@
         </div>
     </div>
 </div>
+
 @endsection

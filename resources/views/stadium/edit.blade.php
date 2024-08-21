@@ -31,19 +31,6 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="stadium_picture" class="form-label">รูปภาพ (ไม่จำเป็น)</label>
-                            <input type="file" class="form-control @error('stadium_picture') is-invalid @enderror" id="stadium_picture" name="stadium_picture">
-                            @error('stadium_picture')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                            @if($stadium->stadium_picture)
-                                <div class="mt-2">
-                                    <img src="{{ asset('storage/' . $stadium->stadium_picture) }}" alt="{{ $stadium->stadium_name }}" width="100">
-                                </div>
-                            @endif
-                        </div>
-
-                        <div class="mb-3">
                             <label for="stadium_status" class="form-label">สถานะ</label>
                             <select class="form-select @error('stadium_status') is-invalid @enderror" id="stadium_status" name="stadium_status" required>
                                 <option value="">เลือกสถานะ</option>

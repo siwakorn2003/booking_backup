@@ -31,14 +31,15 @@
                         </div>
                         
 
-                        <div class="mb-3">
+                        {{-- <div class="mb-3">
                             <label for="stadium_picture" class="form-label">รูปภาพ</label>
                             <input type="file" class="form-control @error('stadium_picture') is-invalid @enderror" id="stadium_picture" name="stadium_picture" required>
                             @error('stadium_picture')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-                        </div>
-
+                        </div> --}}
+                          
+                
                         <div class="mb-3">
                             <label for="stadium_status" class="form-label">สถานะ</label>
                             <select class="form-select @error('stadium_status') is-invalid @enderror" id="stadium_status" name="stadium_status" required>
