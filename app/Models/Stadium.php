@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Stadium extends Model
 {
+    public function timeSlots()
+{
+    return $this->hasMany(StadiumTime::class);
+}
+
     use HasFactory;
 
     // ระบุชื่อตารางที่ต้องการใช้
