@@ -10,7 +10,9 @@
                     <h4>{{ __('การจัดการสนาม') }}</h4>
                 </div>
                 <div class="card-body p-3">
-                    <a href="{{ route('stadiums.create') }}" class="btn btn-primary mb-3">เพิ่มสนามใหม่</a>
+                    @if(Auth::user()->is_admin == 1)
+                        <a href="{{ route('stadiums.create') }}" class="btn btn-primary mb-3">เพิ่มสนามใหม่</a>
+                    @endif
 
                     <table class="table table-bordered">
                         <thead>
@@ -19,6 +21,9 @@
                                 <th>ราคา</th>
                                 <th>สถานะ</th>
                                 <th>ช่วงเวลาจอง</th>
+                                @if(Auth::user()->is_admin == 1)
+                                    <th>การจัดการ</th>
+                                @endif
                             </tr>
                         </thead>
                         <tbody>
@@ -41,14 +46,16 @@
                                         @endfor
                                     </div>
                                 </td>
-                                <td>
-                                    <a href="{{ route('stadiums.edit', $stadium->id) }}" class="btn btn-warning btn-sm">แก้ไข</a>
-                                    <form action="{{ route('stadiums.destroy', $stadium->id) }}" method="POST" style="display:inline;">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger btn-sm">ลบ</button>
-                                    </form>
-                                </td>
+                                @if(Auth::user()->is_admin == 1)
+                                    <td>
+                                        <a href="{{ route('stadiums.edit', $stadium->id) }}" class="btn btn-warning btn-sm">แก้ไข</a>
+                                        <form action="{{ route('stadiums.destroy', $stadium->id) }}" method="POST" style="display:inline;">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger btn-sm">ลบ</button>
+                                        </form>
+                                    </td>
+                                @endif
                             </tr>
                             @endforeach
                         </tbody>

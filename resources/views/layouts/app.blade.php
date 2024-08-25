@@ -17,6 +17,7 @@
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
     <link rel="stylesheet" href="{{ asset('css/login.css') }}">
     
+
 </head>
 <body>
     
@@ -36,6 +37,11 @@
 
                     <!-- Right Side Of Navbar -->
                     <ul class="navbar-nav ms-auto">
+                        <!-- New Booking Button -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('booking') }}">{{ __('จองสนาม') }}</a>
+                        </li>
+                        
                         @guest
                             @if (Route::has('login'))
                                 <li class="nav-item">
@@ -78,6 +84,6 @@
         </main>
     </div>
 
-    @stack('scripts') <!-- เพิ่มบรรทัดนี้ก่อนปิด </body> -->
+    @stack('scripts') 
 </body>
 </html>

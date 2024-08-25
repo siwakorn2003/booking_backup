@@ -14,6 +14,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\BorrowingController;
 use App\Http\Controllers\StadiumController;
+use App\Http\Controllers\BookingController;
 
 Route::get('/', function () {
     return view('home');
@@ -44,3 +45,15 @@ Route::resource('stadiums', StadiumController::class);
 Route::resource('users', UserController::class);
 Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
 Route::get('/borrowings', [BorrowingController::class, 'index'])->name('borrowings.index');
+
+
+Route::group(['middleware' => ['auth', 'is_admin']], function() {
+    Route::get('/admin/stadium', [StadiumController::class, 'index'])->name('stadium.index');
+    Route::post('/admin/stadium', [StadiumController::class, 'store'])->name('stadium.store');
+    // เส้นทางอื่น ๆ ที่เกี่ยวกับการจัดการสนาม
+});
+Route::get('/stadium', [StadiumController::class, 'show'])->name('stadium.show');
+
+// เส้นทางสำหรับการจอง
+Route::get('/booking', [BookingController::class, 'index'])->name('booking');
+Route::post('/booking/store', [BookingController::class, 'store'])->name('booking.store');
