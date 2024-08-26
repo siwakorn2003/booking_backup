@@ -40,11 +40,11 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <div class="d-flex justify-content-between">
+                                    {{-- <div class="d-flex justify-content-between">
                                         @for ($i = 11; $i <= 17; $i++)
                                             <button class="btn btn-outline-primary">{{ $i }}:00-{{ $i+1 }}:00</button>
                                         @endfor
-                                    </div>
+                                    </div> --}}
                                 </td>
                                 @if(Auth::user()->is_admin == 1)
                                     <td>
@@ -65,5 +65,4 @@
         </div>
     </div>
 </div>
-
 @endsection

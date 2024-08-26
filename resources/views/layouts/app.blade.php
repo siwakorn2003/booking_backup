@@ -16,7 +16,7 @@
     <!-- Scripts -->
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
     <link rel="stylesheet" href="{{ asset('css/login.css') }}">
-    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 </head>
 <body>
@@ -41,6 +41,10 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('booking') }}">{{ __('จองสนาม') }}</a>
                         </li>
+                        {{-- <li class="nav-item">
+                            <a class="nav-link" href="{{ route('lending') }}">{{ __('ยืมอุปกรณ์') }}</a>
+                        </li> --}}
+                        
                         
                         @guest
                             @if (Route::has('login'))
@@ -84,6 +88,6 @@
         </main>
     </div>
 
-    @stack('scripts') 
+    @stack('scripts') <!-- เพิ่มบรรทัดนี้ก่อนปิด </body> -->
 </body>
 </html>

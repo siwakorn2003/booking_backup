@@ -20,7 +20,7 @@
     ['info', 'การจัดการสมาชิก', 'เพิ่ม ลบ และแก้ไขข้อมูลสมาชิก', route('users.index'), 'จัดการสมาชิก'],
     ['success', 'การจองสนาม', 'ดูและจัดการการจองสนามทั้งหมด', route('stadiums.index'), 'จัดการการจอง'],
     ['warning', 'สถานะการชำระเงิน', 'ตรวจสอบและอัพเดตสถานะการชำระเงิน', route('payments.index'), 'จัดการสถานะ'],
-    ['danger', 'การยืมอุปกรณ์', 'ตรวจสอบและจัดการการยืมอุปกรณ์', route('borrowings.index'), 'จัดการการยืม'],
+    ['danger', 'การยืมอุปกรณ์', 'ตรวจสอบและจัดการการยืมอุปกรณ์', route('lending.index'), 'จัดการการยืม'],
 ] as [$color, $title, $text, $link, $buttonText])
     <div class="col-md-6 mb-3">
         <div class="card text-white bg-{{ $color }} shadow-sm">
@@ -34,7 +34,7 @@
 @endforeach
 
                     </div>
-
+  
                     <hr class="my-3">
 
                     <div class="row mt-3">
@@ -68,9 +68,11 @@
                                     </div>
                                     <div id="borrowing-data" class="text-center">
                                         <h6>การยืมอุปกรณ์</h6>
-                                        <p>ฟุตบอล - 10 ลูก</p>
-                                        <p>เสื้อเอี้ยม - 15 ตัว</p>
-                                        <p>รองเท้า - 20 คู่</p>
+                                        <ul id="borrowing-items-list" class="list-group">
+                                            <li class="list-group-item">ฟุตบอล - 10 ลูก</li>
+                                            <li class="list-group-item">เสื้อเอี้ยม - 15 ตัว</li>
+                                            <li class="list-group-item">รองเท้า - 20 คู่</li>
+                                        </ul>
                                     </div>
                                 </div>
                             </div>
@@ -133,6 +135,8 @@
         const yearSelector = document.getElementById('year-selector');
         const bookingFieldsCount = document.getElementById('booking-fields-count');
         const borrowingItemsList = document.getElementById('borrowing-items-list');
+        const calendarMonthSelector = document.getElementById('calendar-month-selector');
+        const calendarYearSelector = document.getElementById('calendar-year-selector');
         const calendarBody = document.getElementById('calendar-body');
 
         function updateData() {
@@ -145,11 +149,11 @@
             // Add detailed booking data here if needed
 
             // Update borrowing items
-            borrowingItemsList.innerHTML = 
+            borrowingItemsList.innerHTML = `
                 <li class="list-group-item">ฟุตบอล - 10 ลูก</li>
                 <li class="list-group-item">เสื้อเอี้ยม - 15 ตัว</li>
                 <li class="list-group-item">รองเท้า - 20 คู่</li>
-            ; // Placeholder
+            `; // Placeholder
         }
 
         function updateCalendar() {
@@ -160,18 +164,25 @@
             let firstDay = new Date(year, month - 1, 1).getDay();
             let calendarHtml = '';
 
+            // Create the initial empty cells
             for (let i = 0; i < firstDay; i++) {
                 calendarHtml += '<td></td>';
             }
 
+            // Create cells for each day of the month
             for (let day = 1; day <= days; day++) {
-                calendarHtml += <td>${day}</td>;
+                calendarHtml += `<td>${day}</td>`;
                 if ((firstDay + day) % 7 === 0) {
                     calendarHtml += '</tr><tr>';
                 }
             }
 
-            calendarBody.innerHTML = <tr>${calendarHtml}</tr>;
+            // Close the last row if necessary
+            if ((firstDay + days) % 7 !== 0) {
+                calendarHtml += '</tr>';
+            }
+
+            calendarBody.innerHTML = `<tr>${calendarHtml}</tr>`;
         }
 
         daySelector.addEventListener('change', updateData);
@@ -187,3 +198,4 @@
     });
 </script>
 @endpush
+

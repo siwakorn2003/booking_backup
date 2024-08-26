@@ -15,6 +15,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\BorrowingController;
 use App\Http\Controllers\StadiumController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\LendingController;
 
 Route::get('/', function () {
     return view('home');
@@ -56,4 +57,14 @@ Route::get('/stadium', [StadiumController::class, 'show'])->name('stadium.show')
 
 // เส้นทางสำหรับการจอง
 Route::get('/booking', [BookingController::class, 'index'])->name('booking');
-Route::post('/booking/store', [BookingController::class, 'store'])->name('booking.store');
+// Route::post('/booking/store', [BookingController::class, 'store'])->name('booking.store');
+
+// เส้นทางสำหรับการยืม
+Route::get('/lending', [LendingController::class, 'index'])->name('lending.index');
+Route::get('/borrow-item/{id}', [LendingController::class, 'borrowItem'])->name('borrow-item');
+Route::get('/items/{id}/edit', [LendingController::class, 'edit'])->name('edit-item');
+Route::put('/items/{id}', [LendingController::class, 'update'])->name('update-item');
+Route::get('/repair', [LendingController::class, 'repair'])->name('repair');
+Route::get('/add-item', [LendingController::class, 'addItem'])->name('add-item');
+Route::post('/store-item', [LendingController::class, 'storeItem'])->name('store-item');
+Route::delete('/lending/{id}', [LendingController::class, 'destroy'])->name('lending.destroy');

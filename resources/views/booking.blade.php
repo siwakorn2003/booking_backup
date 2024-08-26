@@ -12,10 +12,10 @@
                     </div>
                     <div class="card-body p-3">
                         <!-- Date Picker -->
-                    <div class="mb-4">
-                        <label for="booking-date" class="form-label">เลือกวันที่</label>
-                        <input type="date" id="booking-date" class="form-control" value="{{ $date }}" onchange="updateBookings()" min="{{ \Carbon\Carbon::now()->format('Y-m-d') }}" max="{{ \Carbon\Carbon::now()->addDays(7)->format('Y-m-d') }}">
-                    </div>
+                        <div class="mb-4">
+                            <label for="booking-date" class="form-label">เลือกวันที่</label>
+                            <input type="date" id="booking-date" class="form-control" value="{{ $date }}" onchange="updateBookings()" min="{{ \Carbon\Carbon::now()->format('Y-m-d') }}" max="{{ \Carbon\Carbon::now()->addDays(7)->format('Y-m-d') }}">
+                        </div>
 
                         <!-- Status Indicators -->
                         <div class="mb-4 text-start">
@@ -43,35 +43,6 @@
                                             {{ $stadium->stadium_status }}
                                         </span>
                                     </p>
-                                    <div class="d-flex flex-wrap">
-                                        @foreach (['11:00-12:00', '12:00-13:00', '13:00-14:00', '14:00-15:00', '15:00-16:00', '16:00-17:00', '17:00-18:00'] as $slot)
-                                        @php
-                                            $status = 'btn-success'; // Default to available
-                                            $startTime = \Carbon\Carbon::createFromFormat('H:i', explode('-', $slot)[0]);
-                                            $booking = $bookings->first(function ($booking) use ($stadium, $startTime) {
-                                                return $booking->stadium_id == $stadium->id && $booking->start_time->eq($startTime);
-                                            });
-                                    
-                                            if ($stadium->stadium_status == 'ปิดปรับปรุง') {
-                                                $status = 'btn-secondary'; // Disabled
-                                                $disabled = 'disabled'; // Add the disabled attribute
-                                            } elseif ($booking) {
-                                                if ($booking->booking_status == 1) {
-                                                    $status = 'btn-secondary'; // Booked
-                                                } elseif ($booking->booking_status == 0) {
-                                                    $status = 'btn-warning'; // Pending
-                                                }
-                                            }
-                                        @endphp
-                                        <button class="btn {{ $status }} text-white me-2 mb-2 time-slot-btn" 
-                                                data-slot="{{ $slot }}" 
-                                                data-stadium-id="{{ $stadium->id }}" 
-                                                onclick="selectTimeSlot(this)"
-                                                {{ $disabled ?? '' }}> <!-- Apply the disabled attribute -->
-                                            {{ $slot }}
-                                        </button>
-                                    @endforeach
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -90,36 +61,11 @@
 
 @push('scripts')
 <script>
-    let selectedSlots = {};
-
-    function selectTimeSlot(button) {
-        if (button.disabled) {
-            return; // Do nothing if the button is disabled
-        }
-
-        const stadiumId = button.getAttribute('data-stadium-id');
-        const slot = button.getAttribute('data-slot');
-
-        if (!selectedSlots[stadiumId]) {
-            selectedSlots[stadiumId] = [];
-        }
-
-        if (selectedSlots[stadiumId].includes(slot)) {
-            selectedSlots[stadiumId] = selectedSlots[stadiumId].filter(s => s !== slot);
-            button.classList.remove('btn-info');
-            button.classList.add('btn-success');
-        } else {
-            selectedSlots[stadiumId].push(slot);
-            button.classList.remove('btn-success');
-            button.classList.add('btn-info');
-        }
-    }
-
     function submitBooking() {
         const date = document.getElementById('booking-date').value;
         const bookingData = {
             date: date,
-            slots: selectedSlots
+            // Remove slots information if not needed
         };
 
         // Send bookingData to server (e.g., via AJAX or form submission)
@@ -146,23 +92,12 @@
 </script>
 @endpush
 
-
 @push('styles')
 <style>
     .stadium-card {
         border: 2px solid #0050a7;
         padding: 15px;
         margin-bottom: 15px;
-    }
-
-    .time-slot-btn {
-        border: 2px solid #ccc;
-        padding: 5px 10px;
-    }
-
-    .time-slot-btn.btn-info {
-        background-color: #17a2b8;
-        border-color: #17a2b8;
     }
 </style>
 @endpush
