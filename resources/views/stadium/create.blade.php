@@ -30,8 +30,6 @@
                             @enderror
                         </div>
 
-                        {{-- Removed image upload section --}}
-                        
                         <div class="mb-3">
                             <label for="stadium_status" class="form-label">สถานะ</label>
                             <select class="form-select @error('stadium_status') is-invalid @enderror" id="stadium_status" name="stadium_status" required>
@@ -44,7 +42,6 @@
                             @enderror
                         </div>
 
-                        <!-- Time slots section -->
                         <div class="mb-3">
                             <label for="time_slots" class="form-label">ช่วงเวลา</label>
                             <div id="time-slots-container">
@@ -55,6 +52,7 @@
                             </div>
                             <button type="button" class="btn btn-outline-success" id="add-time-slot">เพิ่มช่วงเวลา</button>
                         </div>
+                        
 
                         <button type="submit" class="btn btn-primary">เพิ่มสนาม</button>
                     </form>
@@ -89,3 +87,4 @@
 </script>
 @endsection
 @endsection
+
