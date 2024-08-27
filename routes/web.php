@@ -70,3 +70,4 @@ Route::get('/repair', [LendingController::class, 'repair'])->name('repair');
 Route::get('/add-item', [LendingController::class, 'addItem'])->name('add-item');
 Route::post('/store-item', [LendingController::class, 'storeItem'])->name('store-item');
 Route::delete('/lending/{id}', [LendingController::class, 'destroy'])->name('lending.destroy');
+Route::delete('/item/{id}', [LendingController::class, 'destroy'])->name('delete-item');
