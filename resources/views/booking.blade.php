@@ -72,17 +72,17 @@
 
 @push('scripts')
 <script>
-    function submitBooking() {
-        const date = document.getElementById('booking-date').value;
-        const bookingData = {
-            date: date,
-            // Add slots if needed
-        };
+    // function submitBooking() {
+    //     const date = document.getElementById('booking-date').value;
+    //     const bookingData = {
+    //         date: date,
+    //         // Add slots if needed
+    //     };
 
-        // Send bookingData to server (e.g., via AJAX or form submission)
-        console.log('Booking Data:', bookingData);
-        // Your AJAX call or form submission logic here
-    }
+    //     // Send bookingData to server (e.g., via AJAX or form submission)
+    //     console.log('Booking Data:', bookingData);
+    //     // Your AJAX call or form submission logic here
+    // }
 
     function updateBookings() {
         const bookingDateInput = document.getElementById('booking-date');
