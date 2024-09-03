@@ -9,6 +9,7 @@
                     <h4>{{ __('รายการสนามทั้งหมด') }}</h4>
                 </div>
                 <div class="card-body p-3">
+                    <!-- เฉพาะ Admin สามารถเพิ่มสนามใหม่ได้ -->
                     @if(Auth::user()->is_admin == 1)
                         <a href="{{ route('stadiums.create') }}" class="btn btn-primary mb-3">เพิ่มสนามใหม่</a>
                     @endif
@@ -38,12 +39,15 @@
                                     @endif
                                 </td>
                                 <td>
+                                    <!-- แสดงช่วงเวลาทั้งหมดสำหรับ Admin -->
                                     <ul>
                                         @foreach ($stadium->timeSlots as $timeSlot)
                                             <li>{{ $timeSlot->time_slot }}</li>
                                         @endforeach
                                     </ul>
                                 </td>
+                                
+                                <!-- เฉพาะ Admin สามารถจัดการสนามได้ -->
                                 @if(Auth::user()->is_admin == 1)
                                     <td>
                                         <a href="{{ route('stadiums.edit', $stadium->id) }}" class="btn btn-warning btn-sm">แก้ไข</a>

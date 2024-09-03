@@ -106,5 +106,6 @@ public function destroy($id)
     return redirect()->route('stadiums.index')->with('success', 'สนามถูกลบเรียบร้อยแล้ว');
 }
 
+
     
 }    

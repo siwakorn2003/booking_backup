@@ -43,6 +43,17 @@
                                             {{ $stadium->stadium_status }}
                                         </span>
                                     </p>
+                                    
+                                    <!-- Display Time Slots for Users -->
+                                    <div class="d-flex flex-wrap">
+                                        @foreach ($stadium->timeSlots as $timeSlot)
+                                            @if($stadium->stadium_status == 'ปิดปรับปรุง')
+                                                <button class="btn btn-outline-secondary m-1" disabled>{{ $timeSlot->time_slot }}</button>
+                                            @else
+                                                <button class="btn btn-outline-primary m-1">{{ $timeSlot->time_slot }}</button>
+                                            @endif
+                                        @endforeach
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -65,7 +76,7 @@
         const date = document.getElementById('booking-date').value;
         const bookingData = {
             date: date,
-            // Remove slots information if not needed
+            // Add slots if needed
         };
 
         // Send bookingData to server (e.g., via AJAX or form submission)
@@ -100,5 +111,6 @@
         margin-bottom: 15px;
     }
 </style>
+
 @endpush
 @endsection

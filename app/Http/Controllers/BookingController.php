@@ -60,4 +60,20 @@ class BookingController extends Controller
         // ส่งข้อมูลไปยัง view
         return view('booking', compact('stadiums', 'bookings', 'date'));
     }
+    public function showDetail($id)
+    {
+        // รับข้อมูลการจองจากฐานข้อมูลด้วย $id
+        $booking = Booking::find($id);
+
+        // ตรวจสอบว่าข้อมูลการจองมีหรือไม่
+        if (!$booking) {
+            return redirect()->route('booking.index')->with('error', 'ไม่พบการจองนี้');
+        }
+
+        // ส่งข้อมูลไปยัง view 'booking.detail'
+        return view('booking.detail', compact('booking'));
+    }
+    
+    
+    
 }
