@@ -34,12 +34,18 @@ class BookingController extends Controller
     }
     public function confirmation(Request $request)
 {
-    // ตัวอย่างการคำนวณ total price
-    $bookings = BookingStadium::where('user_id', auth()->id())->get();
-    $totalPrice = $bookings->sum('price'); // สมมุติว่า 'price' คือฟิลด์ที่เก็บราคาการจอง
+    // รับข้อมูลจาก request
+    $userName = $request->input('userName');
+    $userPhone = $request->input('userPhone');
+    $date = $request->input('date');
+    $timeSlots = $request->input('timeSlots');
+    $stadiumName = $request->input('stadiumName');
+    $stadiumPrice = $request->input('stadiumPrice');
 
-    return view('confirmation', compact('bookings', 'totalPrice'));
+    // ส่งข้อมูลไปยัง view
+    return view('confirmation', compact('userName', 'userPhone', 'date', 'timeSlots', 'stadiumName', 'stadiumPrice'));
 }
+
 
 
 }
