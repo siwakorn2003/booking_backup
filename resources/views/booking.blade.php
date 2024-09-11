@@ -50,7 +50,7 @@
                                             @if($stadium->stadium_status == 'ปิดปรับปรุง')
                                                 <button class="btn btn-outline-secondary m-1" disabled>{{ $timeSlot->time_slot }}</button>
                                             @else
-                                                <button class="btn btn-outline-primary m-1">{{ $timeSlot->time_slot }}</button>
+                                                <button class="btn btn-outline-primary m-1 time-slot-button" data-time="{{ $timeSlot->time_slot }}" onclick="selectTimeSlot(this)">{{ $timeSlot->time_slot }}</button>
                                             @endif
                                         @endforeach
                                     </div>
@@ -72,17 +72,60 @@
 
 @push('scripts')
 <script>
-    // function submitBooking() {
-    //     const date = document.getElementById('booking-date').value;
-    //     const bookingData = {
-    //         date: date,
-    //         // Add slots if needed
-    //     };
+    let selectedTimeSlots = [];
 
-    //     // Send bookingData to server (e.g., via AJAX or form submission)
-    //     console.log('Booking Data:', bookingData);
-    //     // Your AJAX call or form submission logic here
-    // }
+    function selectTimeSlot(button) {
+        const time = button.getAttribute('data-time');
+
+        // Toggle button state
+        if (selectedTimeSlots.includes(time)) {
+            // Remove time from the array if already selected
+            selectedTimeSlots = selectedTimeSlots.filter(slot => slot !== time);
+            button.classList.remove('active');
+        } else {
+            // Add time to the array if not selected
+            selectedTimeSlots.push(time);
+            button.classList.add('active');
+        }
+
+        console.log('Selected Time Slots:', selectedTimeSlots); // Debug log
+    }
+
+    function submitBooking() {
+    const date = document.getElementById('booking-date').value;
+
+    if (selectedTimeSlots.length === 0) {
+        alert('กรุณาเลือกช่วงเวลาที่ต้องการจอง');
+        return;
+    }
+
+    const bookingData = {
+        date: date,
+        timeSlots: selectedTimeSlots.join(','), // Convert array to a comma-separated string
+        stadiums: @json($stadiums), // Ensure stadiums are included
+        // Add additional data if needed
+    };
+
+    // Create a form and submit it to the booking confirmation page
+    const form = document.createElement('form');
+    form.method = 'GET'; // or 'POST' if necessary
+    form.action = '{{ route('booking.confirmation') }}'; // The route to the confirmation page
+
+    // Append data as hidden inputs
+    for (const key in bookingData) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = bookingData[key];
+        form.appendChild(input);
+    }
+
+    document.body.appendChild(form);
+    form.submit();
+}
+
+
+    
 
     function updateBookings() {
         const bookingDateInput = document.getElementById('booking-date');
@@ -109,6 +152,10 @@
         border: 2px solid #0050a7;
         padding: 15px;
         margin-bottom: 15px;
+    }
+    .time-slot-button.active {
+        background-color: #007bff;
+        color: white;
     }
 </style>
 
