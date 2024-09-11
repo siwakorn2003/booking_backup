@@ -32,49 +32,14 @@ class BookingController extends Controller
         // ส่งข้อมูลไปยัง view
         return view('booking', compact('stadiums', 'bookings', 'date'));
     }
-
-    // ลบหรือปรับปรุงวิธีการ showBookings ตามความต้องการของคุณ
-    public function showBookings(Request $request)
-    {
-        // รับวันที่จาก request หรือใช้วันที่ปัจจุบัน
-        $date = $request->input('date', now()->toDateString());
-
-        // ดึงข้อมูลสนามและการจอง
-        $stadiums = Stadium::all();
-        $bookings = BookingStadium::whereDate('start_time', $date)->get();
-
-        // ตรวจสอบข้อมูล (ลบหลังจากทดสอบเสร็จ)
-        dd($stadiums, $bookings);
-
-        // ตัวอย่างข้อมูลสนามและการจอง (ลบหากใช้งานจริง)
-        $stadiums = [
-            (object)['id' => 1, 'stadium_name' => 'สนาม 1', 'stadium_price' => 1300],
-            (object)['id' => 2, 'stadium_name' => 'สนาม 2', 'stadium_price' => 1500],
-        ];
-
-        $bookings = collect([
-            (object)['stadium_id' => 1, 'start_time' => \Carbon\Carbon::createFromFormat('H:i', '11:00'), 'booking_status' => 1],
-            (object)['stadium_id' => 2, 'start_time' => \Carbon\Carbon::createFromFormat('H:i', '12:00'), 'booking_status' => 0],
-        ]);
-
-        // ส่งข้อมูลไปยัง view
-        return view('booking', compact('stadiums', 'bookings', 'date'));
-    }
-   // ใน BookingController::confirmation
-   public function confirmation(Request $request)
+    public function confirmation(Request $request)
 {
-    $date = $request->input('date');
-    $timeSlots = explode(',', $request->input('timeSlots')); // คอนเวิร์ตเป็น array
-    $stadiums = explode(',', $request->input('stadiums')); // คอนเวิร์ตเป็น array
-    $stadiumPrices = explode(',', $request->input('stadiumPrices')); // คอนเวิร์ตเป็น array
-    $totalHours = $request->input('totalHours');
-    $totalPrice = $request->input('totalPrice');
+    // ตัวอย่างการคำนวณ total price
+    $bookings = BookingStadium::where('user_id', auth()->id())->get();
+    $totalPrice = $bookings->sum('price'); // สมมุติว่า 'price' คือฟิลด์ที่เก็บราคาการจอง
 
-    // Retrieve user data if needed
-    $user = auth()->user(); // Assuming user is authenticated
-
-    // ตรวจสอบข้อมูลที่ส่งไปยัง View
-    return view('booking.confirmation', compact('date', 'timeSlots', 'stadiums', 'stadiumPrices', 'totalHours', 'totalPrice', 'user'));
+    return view('confirmation', compact('bookings', 'totalPrice'));
 }
+
 
 }
