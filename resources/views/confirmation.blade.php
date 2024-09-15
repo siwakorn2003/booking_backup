@@ -19,23 +19,27 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>12345</td> <!-- สมมุติรหัสการจอง -->
-                        <td>{{ Auth::user()->fname }}</td> <!-- ชื่อผู้ใช้ที่ล็อกอิน -->
-                        <td>{{ Auth::user()->phone }}</td> <!-- เบอร์โทรของผู้ใช้ -->
-                        <td>{{ $stadiumName }}</td>
-                        <td>{{ \Carbon\Carbon::parse($date)->format('d/m/Y') }}</td>
-                        <td>{{ $timeSlots }}</td>
-                        <td>{{ number_format($stadiumPrice) }} บาท</td>
-                        <td>{{ count(explode(',', $timeSlots)) }} ชั่วโมง</td>
-                    </tr>
+                    @foreach ($stadiums as $stadium)
+                        @foreach ($stadiumsData[$stadium->id] as $timeSlot)
+                            <tr>
+                                <td>12345</td> <!-- สมมุติรหัสการจอง -->
+                                <td>{{ Auth::user()->fname }}</td>
+                                <td>{{ Auth::user()->phone }}</td>
+                                <td>{{ $stadium->stadium_name }}</td>
+                                <td>{{ \Carbon\Carbon::parse($date)->format('d/m/Y') }}</td>
+                                <td>{{ $timeSlot }}</td>
+                                <td>{{ number_format($stadium->stadium_price) }} บาท</td>
+                                <td>1 ชั่วโมง</td>
+                            </tr>
+                        @endforeach
+                    @endforeach
                 </tbody>
             </table>
 
             <div class="d-flex justify-content-between mt-4">
                 <button class="btn btn-secondary" onclick="goBack()">{{ __('ย้อนกลับ') }}</button>
                 <div>
-                    <span>รวมยอด {{ number_format($stadiumPrice * count(explode(',', $timeSlots))) }} บาท</span>
+                    <span>รวมยอด {{ number_format($totalPrice) }} บาท</span>
                     <button class="btn btn-success ms-3" onclick="confirmBooking()">{{ __('ยืนยันการจอง') }}</button>
                 </div>
             </div>
@@ -51,7 +55,7 @@
     function confirmBooking() {
         alert('ยืนยันการจอง');
         // เพิ่มฟังก์ชันสำหรับการยืนยันการจองที่นี่
+        // เช่น การส่งคำขอ POST ไปยัง server เพื่อบันทึกการจอง
     }
 </script>
 @endsection
-
