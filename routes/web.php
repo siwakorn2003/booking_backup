@@ -78,4 +78,3 @@ Route::delete('/lending/{id}', [LendingController::class, 'destroy'])->name('len
 Route::delete('/item/{id}', [LendingController::class, 'destroy'])->name('delete-item');
 
 
-
