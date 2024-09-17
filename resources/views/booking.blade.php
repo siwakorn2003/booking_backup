@@ -67,8 +67,7 @@
 
 @push('scripts')
 <script>
-    let selectedTimeSlots = {};
-    let selectedStadiums = {};
+    let selectedTimeSlots = JSON.parse(localStorage.getItem('selectedTimeSlots')) || {};
 
     function selectTimeSlot(button, stadiumId) {
         const time = button.getAttribute('data-time');
@@ -84,22 +83,54 @@
             selectedTimeSlots[stadiumId].push(time);
             button.classList.add('active');
         }
+
+        localStorage.setItem('selectedTimeSlots', JSON.stringify(selectedTimeSlots));
     }
 
     function updateBookings() {
-    const date = document.getElementById('booking-date').value;
-    const minDate = new Date('{{ \Carbon\Carbon::now()->format('Y-m-d') }}'); // วันที่ปัจจุบัน
-    const maxDate = new Date('{{ \Carbon\Carbon::now()->addDays(7)->format('Y-m-d') }}'); // 7 วันถัดไป
+        const date = document.getElementById('booking-date').value;
+        if (!date) return;
 
-    const selectedDate = new Date(date);
+        fetch(`/getBookingsByDate?date=${date}`)
+            .then(response => response.json())
+            .then(data => {
+                // ลบสถานะการจองเก่าออกก่อน
+                document.querySelectorAll('.time-slot-button').forEach(button => {
+                    button.classList.remove('btn-warning', 'btn-secondary', 'active');
+                    button.classList.add('btn-outline-primary');
+                    button.disabled = false; // เปิดปุ่มทั้งหมด
+                });
 
-    // ตรวจสอบว่าวันที่เลือกอยู่ในช่วงที่กำหนด
-    if (date && (selectedDate < minDate || selectedDate > maxDate)) {
-        alert('กรุณาเลือกวันที่ภายใน 7 วันจากปัจจุบัน');
-        document.getElementById('booking-date').value = ''; // รีเซ็ตค่า input
+                // อัปเดตปุ่มตามข้อมูลการจองที่ได้รับ
+                data.forEach(booking => {
+                    const stadiumId = booking.stadium_id;
+                    const timeSlot = booking.time_slot;
+                    const button = document.querySelector(`.time-slot-button[data-stadium="${stadiumId}"][data-time="${timeSlot}"]`);
+
+                    if (button) {
+                        if (booking.booking_status === 'รอการตรวจสอบ') {
+                            button.classList.add('btn-warning');
+                            button.disabled = true; // ป้องกันไม่ให้คลิกได้
+                        } else if (booking.booking_status === 'จองแล้ว') {
+                            button.classList.add('btn-secondary');
+                            button.disabled = true; // ป้องกันไม่ให้คลิกได้
+                        }
+                        button.classList.remove('btn-outline-primary');
+                    }
+                });
+
+                // Update the local storage with current selection
+                localStorage.setItem('selectedTimeSlots', JSON.stringify(selectedTimeSlots));
+                updateSelectedButtons();
+            })
+            .catch(error => console.error('Error fetching bookings:', error));
     }
-}
 
+    document.addEventListener('DOMContentLoaded', function() {
+        updateBookings(); // โหลดข้อมูลการจองเมื่อหน้าเว็บถูกโหลด
+    });
+
+    document.getElementById('booking-date').addEventListener('change', updateBookings); // โหลดข้อมูลใหม่เมื่อมีการเปลี่ยนวันที่
 
     function submitBooking() {
         const date = document.getElementById('booking-date').value;
@@ -159,7 +190,6 @@
         });
     }
 
-
     function updateSelectedButtons() {
         document.querySelectorAll('.time-slot-button').forEach(button => {
             const stadiumId = button.getAttribute('data-stadium');
@@ -170,7 +200,6 @@
             }
         });
     }
-
 </script>
 @endpush
 @endsection

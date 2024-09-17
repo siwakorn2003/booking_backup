@@ -26,36 +26,42 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($stadiums as $stadium)
-                            <tr>
-                                <td>{{ $stadium->stadium_name }}</td>
-                                <td>{{ $stadium->stadium_price }} บาท</td>
-                                <td>
-                                    @if($stadium->stadium_status == 'พร้อมให้บริการ')
-                                        <span class="badge bg-success">{{ $stadium->stadium_status }}</span>
-                                    @else
-                                        <span class="badge bg-danger">{{ $stadium->stadium_status }}</span>
-                                    @endif
-                                </td>
-                                <td>
-                                    <ul>
-                                        @foreach ($stadium->timeSlots as $timeSlot)
-                                            <li>{{ $timeSlot->time_slot }}</li>
-                                        @endforeach
-                                    </ul>
-                                </td>
-                                @if(Auth::user()->is_admin == 1)
+                            @if($stadiums->isEmpty())
+                                <tr>
+                                    <td colspan="5" class="text-center">{{ __('ไม่มีข้อมูลของสนาม') }}</td>
+                                </tr>
+                            @else
+                                @foreach($stadiums as $stadium)
+                                <tr>
+                                    <td>{{ $stadium->stadium_name }}</td>
+                                    <td>{{ $stadium->stadium_price }} บาท</td>
                                     <td>
-                                        <a href="{{ route('stadiums.edit', $stadium->id) }}" class="btn btn-warning btn-sm">แก้ไข</a>
-                                        <form action="{{ route('stadiums.destroy', $stadium->id) }}" method="POST" style="display:inline;">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-danger btn-sm">ลบ</button>
-                                        </form>
+                                        @if($stadium->stadium_status == 'พร้อมให้บริการ')
+                                            <span class="badge bg-success">{{ $stadium->stadium_status }}</span>
+                                        @else
+                                            <span class="badge bg-danger">{{ $stadium->stadium_status }}</span>
+                                        @endif
                                     </td>
-                                @endif
-                            </tr>
-                            @endforeach
+                                    <td>
+                                        <ul>
+                                            @foreach ($stadium->timeSlots as $timeSlot)
+                                                <li>{{ $timeSlot->time_slot }}</li>
+                                            @endforeach
+                                        </ul>
+                                    </td>
+                                    @if(Auth::user()->is_admin == 1)
+                                        <td>
+                                            <a href="{{ route('stadiums.edit', $stadium->id) }}" class="btn btn-warning btn-sm">แก้ไข</a>
+                                            <form action="{{ route('stadiums.destroy', $stadium->id) }}" method="POST" style="display:inline;">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-danger btn-sm">ลบ</button>
+                                            </form>
+                                        </td>
+                                    @endif
+                                </tr>
+                                @endforeach
+                            @endif
                         </tbody>
                     </table>
                 </div>

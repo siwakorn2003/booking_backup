@@ -60,7 +60,17 @@ class BookingController extends Controller
     
         return response()->json(['success' => true]); 
     }
-    
+    public function getBookingsByDate(Request $request)
+{
+    $selectedDate = $request->input('date');
+
+    // ดึงข้อมูลการจองตามวันที่ที่เลือก
+    $bookings = BookingTimeSlot::where('booking_date', $selectedDate)->get();
+
+    return response()->json($bookings);
+}
+
+
 
 }
 
