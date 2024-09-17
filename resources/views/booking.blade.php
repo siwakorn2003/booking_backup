@@ -1,5 +1,4 @@
 @extends('layouts.app')
-@stack('styles')
 
 @section('content')
 <main class="py-4">
@@ -11,20 +10,22 @@
                         <h4>{{ __('การจองสนาม') }}</h4>
                     </div>
                     <div class="card-body p-3">
-                        <!-- Date Picker -->
                         <div class="mb-4">
                             <label for="booking-date" class="form-label">เลือกวันที่</label>
-                            <input type="date" id="booking-date" class="form-control" value="{{ $date }}" onchange="updateBookings()" min="{{ \Carbon\Carbon::now()->format('Y-m-d') }}" max="{{ \Carbon\Carbon::now()->addDays(7)->format('Y-m-d') }}">
+                            <input type="date" id="booking-date" class="form-control" 
+    onchange="updateBookings()" 
+    min="{{ \Carbon\Carbon::now()->format('Y-m-d') }}" 
+    max="{{ \Carbon\Carbon::now()->addDays(7)->format('Y-m-d') }}">
+
                         </div>
 
-                        <!-- Status Indicators -->
                         <div class="mb-4 text-start">
                             <button class="btn btn-md btn-success me-3">ว่าง</button>
                             <button class="btn btn-md btn-warning text-dark me-3">รอการตรวจสอบ</button>
                             <button class="btn btn-md btn-secondary">มีการจองแล้ว</button>
                         </div>
 
-                        <!-- Fields -->
+                        <!-- Stadiums Loop -->
                         @foreach ($stadiums as $stadium)
                         <div class="mb-4">
                             <div class="card border-light">
@@ -32,40 +33,31 @@
                                     <h5 class="card-title">{{ $stadium->stadium_name }}</h5>
                                     <p class="card-text">ราคา: {{ number_format($stadium->stadium_price) }} บาท</p>
                                     <p class="card-text">สถานะ: 
-                                        <span class="badge 
-                                            @if ($stadium->stadium_status == 'พร้อมให้บริการ') 
-                                                bg-success
-                                            @elseif ($stadium->stadium_status == 'ปิดปรับปรุง') 
-                                                bg-danger
-                                            @else 
-                                                bg-secondary
-                                            @endif">
+                                        <span class="badge @if ($stadium->stadium_status == 'พร้อมให้บริการ') bg-success @else bg-danger @endif">
                                             {{ $stadium->stadium_status }}
                                         </span>
                                     </p>
                                     
-                                    <!-- Display Time Slots for Users -->
                                     <div class="d-flex flex-wrap">
                                         @foreach ($stadium->timeSlots as $timeSlot)
-                                            @if($stadium->stadium_status == 'ปิดปรับปรุง')
-                                                <button class="btn btn-outline-secondary m-1" disabled>{{ $timeSlot->time_slot }}</button>
-                                            @else
-                                                <button class="btn btn-outline-primary m-1 time-slot-button" data-stadium="{{ $stadium->id }}" data-time="{{ $timeSlot->time_slot }}" onclick="selectTimeSlot(this, {{ $stadium->id }})">{{ $timeSlot->time_slot }}</button>
-                                            @endif
+                                            <button class="btn btn-outline-primary m-1 time-slot-button" data-stadium="{{ $stadium->id }}" data-time="{{ $timeSlot->time_slot }}" onclick="selectTimeSlot(this, {{ $stadium->id }})">{{ $timeSlot->time_slot }}</button>
                                         @endforeach
                                     </div>
                                 </div>
                             </div>
                         </div>
                         @endforeach
-                        
-                        <!-- Booking Button -->
+
+                        <!-- เงื่อนไขการแสดงปุ่มตามสถานะการล็อกอิน -->
                         <div class="text-center">
-                            <button class="btn btn-primary" onclick="submitBooking()">จองสนาม</button>
+                            @guest
+                                <p class="text-center">กรุณาเข้าสู่ระบบเพื่อทำการจองสนาม</p>
+                            @else
+                                <button class="btn btn-primary" onclick="submitBooking()">จองสนาม</button>
+                            @endguest
                         </div>
 
-                        <!-- Result Message -->
-                        <div id="booking-result" class="text-center mt-4"></div> <!-- แสดงข้อความผลลัพธ์การจอง -->
+                        <div id="booking-result" class="text-center mt-4"></div>
                     </div>
                 </div>
             </div>
@@ -75,17 +67,16 @@
 
 @push('scripts')
 <script>
-    let selectedTimeSlots = {}; // Object to store selected time slots per stadium
+    let selectedTimeSlots = {};
+    let selectedStadiums = {};
 
     function selectTimeSlot(button, stadiumId) {
         const time = button.getAttribute('data-time');
-        
         if (!selectedTimeSlots[stadiumId]) {
             selectedTimeSlots[stadiumId] = [];
         }
 
         const timeIndex = selectedTimeSlots[stadiumId].indexOf(time);
-
         if (timeIndex > -1) {
             selectedTimeSlots[stadiumId].splice(timeIndex, 1);
             button.classList.remove('active');
@@ -93,84 +84,93 @@
             selectedTimeSlots[stadiumId].push(time);
             button.classList.add('active');
         }
-
-        console.log('Selected Time Slots:', selectedTimeSlots);
     }
 
-    function submitBooking() {
+    function updateBookings() {
     const date = document.getElementById('booking-date').value;
+    const minDate = new Date('{{ \Carbon\Carbon::now()->format('Y-m-d') }}'); // วันที่ปัจจุบัน
+    const maxDate = new Date('{{ \Carbon\Carbon::now()->addDays(7)->format('Y-m-d') }}'); // 7 วันถัดไป
 
-    if (!date) {
-        alert('กรุณาเลือกวันที่');
-        return;
+    const selectedDate = new Date(date);
+
+    // ตรวจสอบว่าวันที่เลือกอยู่ในช่วงที่กำหนด
+    if (date && (selectedDate < minDate || selectedDate > maxDate)) {
+        alert('กรุณาเลือกวันที่ภายใน 7 วันจากปัจจุบัน');
+        document.getElementById('booking-date').value = ''; // รีเซ็ตค่า input
     }
-
-    if (Object.keys(selectedTimeSlots).length === 0) {
-        alert('กรุณาเลือกช่วงเวลาที่ต้องการจอง');
-        return;
-    }
-
-    // แปลง selectedTimeSlots เป็น array ของ time_slot_id
-    const timeSlots = Object.values(selectedTimeSlots).flat();
-
-    const bookingData = {
-        date: date,
-        timeSlots: timeSlots,
-        _token: '{{ csrf_token() }}'
-    };
-
-    fetch('{{ route('booking.store') }}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-        },
-        body: JSON.stringify(bookingData)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            document.getElementById('booking-result').innerHTML = '<div class="alert alert-success">การจองสำเร็จ</div>';
-        } else {
-            document.getElementById('booking-result').innerHTML = '<div class="alert alert-danger">เกิดข้อผิดพลาดในการจองสนาม</div>';
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        document.getElementById('booking-result').innerHTML = '<div class="alert alert-danger">เกิดข้อผิดพลาดในการจองสนาม</div>';
-    });
 }
 
 
-    function updateBookings() {
-        const bookingDateInput = document.getElementById('booking-date');
-        const selectedDate = new Date(bookingDateInput.value);
-        const today = new Date();
-        const maxDate = new Date();
-        maxDate.setDate(today.getDate() + 7);
+    function submitBooking() {
+        const date = document.getElementById('booking-date').value;
+        const selectedStadiums = Object.keys(selectedTimeSlots);
 
-        if (selectedDate < today || selectedDate > maxDate) {
-            alert('กรุณาเลือกวันที่ภายใน 7 วันจากวันนี้');
-            bookingDateInput.value = '';
+        if (!date) {
+            alert('กรุณาเลือกวันที่');
             return;
         }
 
-        window.location.href = `{{ route('booking') }}?date=${encodeURIComponent(bookingDateInput.value)}`;
-    }
-</script>
-@endpush
+        if (selectedStadiums.length === 0) {
+            alert('กรุณาเลือกสนาม');
+            return;
+        }
 
-@push('styles')
-<style>
-    .stadium-card {
-        border: 2px solid #0050a7;
-        padding: 15px;
-        margin-bottom: 15px;
+        let hasSelectedTime = false;
+        for (let stadiumId of selectedStadiums) {
+            if (selectedTimeSlots[stadiumId].length > 0) {
+                hasSelectedTime = true;
+                break;
+            }
+        }
+
+        if (!hasSelectedTime) {
+            alert('กรุณาเลือกช่วงเวลาที่ต้องการจอง');
+            return;
+        }
+
+        const bookingData = {
+            date: date,
+            timeSlots: selectedTimeSlots,
+            _token: '{{ csrf_token() }}'
+        };
+
+        fetch('{{ route('booking.store') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify(bookingData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.login_required) {
+                window.location.href = '{{ route('login') }}'; // Redirect ไปหน้าเข้าสู่ระบบ
+            } else if (data.success) {
+                document.getElementById('booking-result').innerHTML = '<div class="alert alert-success">การจองสำเร็จ</div>';
+                updateSelectedButtons();
+            } else {
+                document.getElementById('booking-result').innerHTML = '<div class="alert alert-danger">' + data.message + '</div>';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('booking-result').innerHTML = '<div class="alert alert-danger">เกิดข้อผิดพลาดในการจองสนาม</div>';
+        });
     }
-    .time-slot-button.active {
-        background-color: #007bff;
-        color: white;
+
+
+    function updateSelectedButtons() {
+        document.querySelectorAll('.time-slot-button').forEach(button => {
+            const stadiumId = button.getAttribute('data-stadium');
+            const time = button.getAttribute('data-time');
+            if (selectedTimeSlots[stadiumId] && selectedTimeSlots[stadiumId].includes(time)) {
+                button.classList.add('btn-warning'); // เปลี่ยนสีปุ่มเป็นสีส้ม
+                button.classList.remove('btn-outline-primary');
+            }
+        });
     }
-</style>
+
+</script>
 @endpush
 @endsection

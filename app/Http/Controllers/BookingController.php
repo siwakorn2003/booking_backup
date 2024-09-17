@@ -10,40 +10,7 @@ use Carbon\Carbon;
 
 class BookingController extends Controller
 {
-    // public function index(Request $request)
-    // {
-    //     $date = $request->query('date', date('Y-m-d'));
-    //     $stadiums = Stadium::all();
-    //     $bookings = BookingStadium::where('booking_date', $date)->get();
 
-    //     return view('booking', compact('stadiums', 'bookings', 'date'));
-    // }
-
-    // public function store(Request $request)
-    // {
-    //     // ตรวจสอบข้อมูลที่ส่งมา
-    //     $validatedData = $request->validate([
-    //         'date' => 'required|date',
-    //         'timeSlots' => 'required|array',
-    //         'timeSlots.*' => 'required|integer|exists:time_slots,id'
-    //     ]);
-
-    //     $userId = Auth::id();
-    //     $date = $validatedData['date'];
-    //     $timeSlots = $validatedData['timeSlots'];
-
-    //     // บันทึกการจองลงในฐานข้อมูล
-    //     foreach ($timeSlots as $timeSlotId) {
-    //         BookingStadium::create([
-    //             'booking_date' => $date,
-    //             'booking_status' => 'รอการตรวจสอบ', // สถานะเริ่มต้น
-    //             'user_id' => $userId,
-    //             'time_slot_id' => $timeSlotId
-    //         ]);
-    //     }
-
-    //     return response()->json(['success' => true]);
-    // }
     public function index(Request $request)
     {
         $date = $request->query('date', date('Y-m-d'));
@@ -53,48 +20,47 @@ class BookingController extends Controller
         return view('booking', compact('stadiums', 'bookings', 'date'));
     }
 
-    // public function store(Request $request)
-    // {
-    //     $validatedData = $request->validate([
-    //         'date' => 'required|date',
-    //         'timeSlots' => 'required|array',
-    //         'timeSlots.*' => 'required|string' // แก้ไขจาก 'array' เป็น 'string'
-    //     ]);
-    
-    //     // ลูปผ่านแต่ละ time slot ที่เลือก
-    //     foreach ($validatedData['timeSlots'] as $stadiumId => $timeSlots) {
-    //         foreach ($timeSlots as $timeSlot) {
-    //             BookingStadium::create([
-    //                 'booking_date' => $validatedData['date'],
-    //                 'booking_status' => 0, // 0 = รอการตรวจสอบ
-    //                 'user_id' => Auth::id(),
-    //                 'time_slot_id' => $timeSlot
-    //             ]);
-    //         }
-    //     }
-    
-    //     return response()->json(['success' => true]);
-    // }
+   
     public function store(Request $request)
-{
-    $validatedData = $request->validate([
-        'date' => 'required|date',
-        'timeSlots' => 'required|array'
-    ]);
-
-    foreach ($validatedData['timeSlots'] as $stadiumId => $timeSlots) {
-        foreach ($timeSlots as $timeSlot) {
-            BookingStadium::create([
-                'booking_date' => $validatedData['date'],
-                'booking_status' => 0, // รอการตรวจสอบ
-                'user_id' => auth()->id(),
-                'time_slot_id' => $timeSlot
-            ]);
+    {
+        $validatedData = $request->validate([
+            'date' => 'required|date',
+            'timeSlots' => 'required|array'
+        ]);
+    
+        foreach ($validatedData['timeSlots'] as $stadiumId => $timeSlots) {
+            foreach ($timeSlots as $timeSlot) {
+                // ดึง ID ของ time slot
+                $timeSlotId = \DB::table('time_slot')
+                    ->where('time_slot', $timeSlot) // ช่วงเวลาที่ส่งมาจากฟอร์ม
+                    ->value('id'); // ดึง ID ของช่วงเวลานั้น
+    
+                if (!$timeSlotId) {
+                    return response()->json(['success' => false, 'message' => 'เวลานี้ไม่ถูกต้อง']);
+                }
+    
+                // ตรวจสอบการจองซ้ำ
+                $existingBooking = BookingStadium::where('booking_date', $validatedData['date'])
+                    ->where('time_slot_id', $timeSlotId)
+                    ->exists();
+    
+                if ($existingBooking) {
+                    return response()->json(['success' => false, 'message' => 'เวลานี้ถูกจองแล้ว']);
+                }
+    
+                // บันทึกการจอง
+                BookingStadium::create([
+                    'booking_date' => $validatedData['date'],
+                    'time_slot_id' => $timeSlotId,
+                    'user_id' => auth()->id(),
+                    'booking_status' => 'รอการตรวจสอบ'
+                ]);
+            }
         }
+    
+        return response()->json(['success' => true]); 
     }
-
-    return response()->json(['success' => true]);
-}
+    
 
 }
 
