@@ -89,4 +89,4 @@ Route::post('/borrow', [LendingController::class, 'storeBorrow'])
     Route::group(['middleware' => 'auth'], function() {
     Route::post('/booking/store', [BookingController::class, 'store'])->name('booking.store');
 });
-Route::get('/getBookingsByDate', [BookingController::class, 'getBookingsByDate'])->name('booking.getBookingsByDate');
+Route::get('/booking_detail/{id}', [BookingController::class, 'showBookingDetail'])->name('booking.detail');
