@@ -13,24 +13,22 @@
                         <a href="{{ route('stadiums.create') }}" class="btn btn-primary mb-3">เพิ่มสนามใหม่</a>
                     @endif
 
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>ชื่อสนาม</th>
-                                <th>ราคา</th>
-                                <th>สถานะ</th>
-                                <th>ช่วงเวลา</th>
-                                @if(Auth::user()->is_admin == 1)
-                                    <th>การจัดการ</th>
-                                @endif
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if($stadiums->isEmpty())
+                    @if($stadiums->isEmpty())
+                        <p class="text-center">ไม่พบรายการสนาม</p>
+                    @else
+                        <table class="table table-bordered">
+                            <thead>
                                 <tr>
-                                    <td colspan="5" class="text-center">{{ __('ไม่มีข้อมูลของสนาม') }}</td>
+                                    <th>ชื่อสนาม</th>
+                                    <th>ราคา</th>
+                                    <th>สถานะ</th>
+                                    <th>ช่วงเวลา</th>
+                                    @if(Auth::user()->is_admin == 1)
+                                        <th>การจัดการ</th>
+                                    @endif
                                 </tr>
-                            @else
+                            </thead>
+                            <tbody>
                                 @foreach($stadiums as $stadium)
                                 <tr>
                                     <td>{{ $stadium->stadium_name }}</td>
@@ -61,9 +59,9 @@
                                     @endif
                                 </tr>
                                 @endforeach
-                            @endif
-                        </tbody>
-                    </table>
+                            </tbody>
+                        </table>
+                    @endif
                 </div>
             </div>
         </div>

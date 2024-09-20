@@ -60,20 +60,5 @@ class BookingController extends Controller
     
         return response()->json(['success' => true]); 
     }
-    public function showBookingDetail($bookingId)
-{
-    // ดึงข้อมูลการจองจากฐานข้อมูลโดยใช้ id การจอง
-    $booking = DB::table('booking_stadium')
-        ->join('stadium', 'stadium.id', '=', 'booking_stadium.stadium_id')
-        ->join('time_slot', 'time_slot.id', '=', 'booking_stadium.time_slot_id')
-        ->where('booking_stadium.id', $bookingId)
-        ->select('booking_stadium.id as booking_id', 'stadium.stadium_name', 'stadium.stadium_price', 'booking_stadium.booking_date', 'time_slot.time', 'booking_stadium.booking_status')
-        ->first();
-
-    // ส่งข้อมูลการจองไปยัง view booking_detail
-    return view('booking_detail', compact('booking'));
+    
 }
-
-
-}
-

@@ -13,10 +13,11 @@
                         <div class="mb-4">
                             <label for="booking-date" class="form-label">เลือกวันที่</label>
                             <input type="date" id="booking-date" class="form-control" 
-                            onchange="updateBookings()" 
-                            min="{{ \Carbon\Carbon::now()->format('Y-m-d') }}" 
-                            max="{{ \Carbon\Carbon::now()->addDays(7)->format('Y-m-d') }}">
-                         </div>
+    onchange="updateBookings()" 
+    min="{{ \Carbon\Carbon::now()->format('Y-m-d') }}" 
+    max="{{ \Carbon\Carbon::now()->addDays(7)->format('Y-m-d') }}">
+
+                        </div>
 
                         <div class="mb-4 text-start">
                             <button class="btn btn-md btn-success me-3">ว่าง</button>
@@ -49,12 +50,20 @@
 
                         <!-- เงื่อนไขการแสดงปุ่มตามสถานะการล็อกอิน -->
                         <div class="text-center">
-                            @guest
-                                <p class="text-center">กรุณาเข้าสู่ระบบเพื่อทำการจองสนาม</p>
+                            @auth
+                                <!-- เมื่อผู้ใช้ล็อกอินแล้ว -->
+                                <button class="btn btn-primary" onclick="submitBooking()">
+                                    {{ __('จองสนาม') }}
+                                </button>
                             @else
-                                <button class="btn btn-primary" onclick="submitBooking()">จองสนาม</button>
-                            @endguest
+                                <!-- เมื่อผู้ใช้ยังไม่ได้ล็อกอิน -->
+                                <a href="{{ route('login') }}" class="btn btn-primary" onclick="alert('โปรดเข้าสู่ระบบก่อนทำการจอง');">
+                                    {{ __('จองสนาม') }}
+                                </a>
+                            @endauth
                         </div>
+                        
+
 
                         <div id="booking-result" class="text-center mt-4"></div>
                     </div>
