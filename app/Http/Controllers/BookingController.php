@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Stadium;
 use Illuminate\Http\Request;
-use App\Models\BookingStadium;
+use App\Models\BookingDetail;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
@@ -15,10 +15,11 @@ class BookingController extends Controller
     {
         $date = $request->query('date', date('Y-m-d'));
         $stadiums = Stadium::all();
-        $bookings = BookingStadium::where('booking_date', $date)->get();
-
+        $bookings = BookingDetail::where('booking_date', $date)->get(); // เปลี่ยนจาก BookingStadium เป็น BookingDetail
+    
         return view('booking', compact('stadiums', 'bookings', 'date'));
     }
+    
 
    
     public function store(Request $request)
@@ -39,26 +40,30 @@ class BookingController extends Controller
                     return response()->json(['success' => false, 'message' => 'เวลานี้ไม่ถูกต้อง']);
                 }
     
-                // ตรวจสอบการจองซ้ำ
-                $existingBooking = BookingStadium::where('booking_date', $validatedData['date'])
-                    ->where('time_slot_id', $timeSlotId)
+                // ตรวจสอบการจองซ้ำใน booking_detail แทน booking_stadium
+                $existingBooking = BookingDetail::where('booking_date', $validatedData['date'])
+                    ->where('time_slot_id', $timeSlotId)  // ต้องเพิ่มคอลัมน์ time_slot_id ใน booking_detail ถ้ายังไม่มี
                     ->exists();
     
                 if ($existingBooking) {
                     return response()->json(['success' => false, 'message' => 'เวลานี้ถูกจองแล้ว']);
                 }
     
-                // บันทึกการจอง
-                BookingStadium::create([
+                // บันทึกการจองใน booking_detail แทน booking_stadium
+                BookingDetail::create([
+                    'stadium_id' => $stadiumId,
+                    'booking_stadium_id' => 1, // กำหนด booking_stadium_id ถ้าจำเป็น ถ้าไม่ใช้ก็ปรับโครงสร้าง
+                    'booking_total_hour' => 1, // กำหนดจำนวนชั่วโมงการจอง
+                    'booking_total_price' => 100, // กำหนดราคาการจอง
                     'booking_date' => $validatedData['date'],
-                    'time_slot_id' => $timeSlotId,
-                    'user_id' => auth()->id(),
-                    'booking_status' => 'รอการตรวจสอบ'
+                    'booking_status' => 'รอการตรวจสอบ',
+                    'users_id' => auth()->id(),
                 ]);
             }
         }
     
         return response()->json(['success' => true]); 
     }
+    
     
 }
