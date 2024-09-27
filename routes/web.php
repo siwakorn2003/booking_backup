@@ -88,5 +88,3 @@ Route::post('/store-item', [LendingController::class, 'storeItem'])->name('store
 Route::group(['middleware' => 'auth'], function() {
     Route::post('/booking/store', [BookingController::class, 'store'])->name('booking.store');
 });
-
-Route::get('/booking-status', [BookingController::class, 'bookingStatus'])->name('booking.status');

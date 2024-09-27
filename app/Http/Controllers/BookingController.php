@@ -15,62 +15,60 @@ class BookingController extends Controller
     {
         $date = $request->query('date', date('Y-m-d'));
         $stadiums = Stadium::all();
-        $bookings = BookingDetail::where('booking_date', $date)->get(); // เปลี่ยนจาก BookingStadium เป็น BookingDetail
+        $bookings = BookingDetail::where('booking_date', $date)->get();
     
         return view('booking', compact('stadiums', 'bookings', 'date'));
     }
-    
 
-   
     public function store(Request $request)
-{
-    $validatedData = $request->validate([
-        'date' => 'required|date',
-        'timeSlots' => 'required|array'
-    ]);
-
-    foreach ($validatedData['timeSlots'] as $stadiumId => $timeSlots) {
-        // สร้าง BookingDetail ก่อน
-        $bookingDetail = BookingDetail::create([
-            'stadium_id' => $stadiumId,
-            'booking_total_hour' => 1, // กำหนดจำนวนชั่วโมงการจอง
-            'booking_total_price' => 100, // กำหนดราคาการจอง
-            'booking_date' => $validatedData['date'],
-            'booking_status' => 'รอการตรวจสอบ',
-            'users_id' => auth()->id(),
+    {
+        $validatedData = $request->validate([
+            'date' => 'required|date',
+            'timeSlots' => 'required|array'
         ]);
 
-        foreach ($timeSlots as $timeSlot) {
-            // ดึง ID ของ time slot
-            $timeSlotId = \DB::table('time_slot')
-                ->where('time_slot', $timeSlot) // ช่วงเวลาที่ส่งมาจากฟอร์ม
-                ->value('id'); // ดึง ID ของช่วงเวลานั้น
+        foreach ($validatedData['timeSlots'] as $stadiumId => $timeSlots) {
 
-            if (!$timeSlotId) {
-                return response()->json(['success' => false, 'message' => 'เวลานี้ไม่ถูกต้อง']);
+            foreach ($timeSlots as $timeSlot) {
+                // ดึง ID ของ time slot
+               // ดึงข้อมูล time slot และ stadium_id ที่ตรงกับช่วงเวลาและสนาม
+                $timeSlotData = \DB::table('time_slot')
+                ->where('time_slot', $timeSlot)
+                ->where('stadium_id', $stadiumId) // ตรวจสอบให้แน่ใจว่าข้อมูล stadium_id ตรงกันด้วย
+                ->first(['id', 'stadium_id']); // ดึงข้อมูลทั้ง id และ stadium_id
+
+                if (!$timeSlotData) {
+                return response()->json(['success' => false, 'message' => 'เวลาหรือสนามนี้ไม่ถูกต้อง']);
+                }
+
+                // ใช้ค่า time_slot_id และ stadium_id ที่ดึงมาได้
+                $timeSlotId = $timeSlotData->id;
+                $timeSlotStadiumId = $timeSlotData->stadium_id;
+
+                // บันทึกข้อมูลลงใน booking_stadium ด้วยค่าที่ถูกต้อง
+                $bookingStadiumId = \DB::table('booking_stadium')->insertGetId([
+                'booking_status' => 'รอการตรวจสอบ',  
+                'booking_date' => $validatedData['date'],
+                'users_id' => auth()->id(),
+                'time_slot_id' => $timeSlotId,  
+                'time_slot_stadium_id' => $timeSlotStadiumId,
+                'created_at' => now(),
+                'updated_at' => now(),
+                ]);
+
+
+                // สร้าง BookingDetail เพื่อเก็บรายละเอียดการจอง
+                $bookingDetail = BookingDetail::create([
+                    'stadium_id' => $stadiumId,
+                    'booking_total_hour' => 1, // กำหนดจำนวนชั่วโมงการจอง
+                    'booking_total_price' => 100, // กำหนดราคาการจอง
+                    'booking_date' => $validatedData['date'],
+                    'users_id' => auth()->id(),
+                ]);
             }
-
-            // ตรวจสอบการจองซ้ำ
-            $existingBooking = \DB::table('time_slot_has_booking_detail')
-                ->where('time_slot_id', $timeSlotId)
-                ->where('booking_detail_id', $bookingDetail->id) // เช็คกับ booking_detail ที่เพิ่งสร้าง
-                ->exists();
-
-            if ($existingBooking) {
-                return response()->json(['success' => false, 'message' => 'เวลานี้ถูกจองแล้ว']);
-            }
-
-            // บันทึกความสัมพันธ์ใน time_slot_has_booking_detail
-            \DB::table('time_slot_has_booking_detail')->insert([
-                'time_slot_id' => $timeSlotId,
-                'booking_detail_id' => $bookingDetail->id,
-            ]);
         }
+
+        return response()->json(['success' => true]); 
     }
 
-    return response()->json(['success' => true]); 
-}
-
-    
-    
 }
