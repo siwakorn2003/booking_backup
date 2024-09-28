@@ -77,28 +77,44 @@ class BookingController extends Controller
 }
 
 
-
-
-public function showBookingDetail()
+public function confirmBooking(Request $request)
 {
-    // ดึง id จาก session
-    $id = session('booking_stadium_id');
+    // บันทึกการจอง
+    $bookingStadium = BookingStadium::create([
+        'booking_status' => 'รอการชำระเงิน',  
+        'booking_date' => $request->date,
+        'users_id' => auth()->id(),
+        // ... (ข้อมูลเพิ่มเติมที่ต้องการ)
+    ]);
 
-    // ตรวจสอบว่า session มี id หรือไม่
-    if (!$id) {
-        return back()->withErrors(['error' => 'ไม่พบข้อมูลการจอง']);
-    }
+    // เก็บ id การจองใน session
+    session(['booking_stadium_id' => $bookingStadium->id]);
 
-    // ดึงรายละเอียดการจอง
-    $bookingDetail = BookingDetail::where('booking_stadium_id', $id)->first();
-
-    if (!$bookingDetail) {
-        return back()->withErrors(['error' => 'ไม่พบข้อมูลการจอง']);
-    }
-
-    // แสดงหน้ารายละเอียดการจอง
-    return view('bookingdetail', compact('bookingDetail'));
+    return response()->json(['success' => true]);
 }
+
+public function showBookingDetails($bookingId)
+{
+    // Fetch the booking detail using the booking ID
+    $bookingDetail = Booking::with(['user', 'stadiums.timeSlots'])->findOrFail($bookingId);
+
+    // Get the booking details for the specified booking
+    $bookingDetails = $bookingDetail->stadiums; // Assuming that `stadiums` is a relationship in the Booking model
+
+    // Calculate total hours and total price if needed
+    $totalHours = $bookingDetails->sum('booking_total_hour');
+    $totalPrice = $bookingDetails->sum('booking_total_price');
+
+    // Pass the variables to the view
+    return view('your.view.name', [
+        'bookingDetail' => $bookingDetail,
+        'bookingDetails' => $bookingDetails,
+        'totalHours' => $totalHours,
+        'totalPrice' => $totalPrice,
+    ]);
+}
+
+
 
 
 }

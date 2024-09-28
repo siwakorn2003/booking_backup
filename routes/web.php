@@ -99,3 +99,4 @@ Route::get('/lending/borrow-detail', [LendingController::class, 'borrowDetail'])
 
 
     Route::get('/booking/detail', [BookingController::class, 'showBookingDetail'])->name('bookingdetail');
+    

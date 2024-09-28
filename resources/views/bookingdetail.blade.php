@@ -52,33 +52,35 @@
     @push('scripts')
         <script>
             function confirmBooking() {
-                if (confirm('คุณต้องการยืนยันการจองใช่หรือไม่?')) {
-                    $.ajax({
-                        url: '{{ route('booking.store') }}',
-                        method: 'POST',
-                        data: {
-                            date: '{{ $bookingStadium->booking_date }}',
-                            timeSlots: @json($timeSlots),
-                            stadiums: @json($stadiums),
-                            stadiumPrices: @json($stadiumPrices),
-                            totalHours: '{{ $totalHours }}',
-                            totalPrice: '{{ $totalPrice }}',
-                            _token: '{{ csrf_token() }}'
-                        },
-                        success: function(response) {
-                            alert('การจองสำเร็จ!');
-                            window.location.href = '/booking/history'; // ตัวอย่างการ redirect
-                        },
-                        error: function(xhr) {
-                            let errorMessage = 'เกิดข้อผิดพลาดในการจอง กรุณาลองใหม่';
-                            if (xhr.responseJSON && xhr.responseJSON.error) {
-                                errorMessage = xhr.responseJSON.error; // แสดงข้อความข้อผิดพลาดจากเซิร์ฟเวอร์
-                            }
-                            alert(errorMessage);
-                        }
-                    });
+    if (confirm('คุณต้องการยืนยันการจองใช่หรือไม่?')) {
+        $.ajax({
+            url: '{{ route('booking.store') }}',
+            method: 'POST',
+            data: {
+                date: '{{ $bookingStadium->booking_date }}',
+                timeSlots: @json($timeSlots),
+                stadiums: @json($stadiums),
+                stadiumPrices: @json($stadiumPrices),
+                totalHours: '{{ $totalHours }}',
+                totalPrice: '{{ $totalPrice }}',
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(response) {
+                alert('การจองสำเร็จ!');
+                // เปลี่ยน redirect ไปยังหน้าแสดงรายละเอียดการจอง
+                window.location.href = '{{ route("bookingdetail") }}'; // เปลี่ยนให้ตรงกับ route ของคุณ
+            },
+            error: function(xhr) {
+                let errorMessage = 'เกิดข้อผิดพลาดในการจอง กรุณาลองใหม่';
+                if (xhr.responseJSON && xhr.responseJSON.error) {
+                    errorMessage = xhr.responseJSON.error; // แสดงข้อความข้อผิดพลาดจากเซิร์ฟเวอร์
                 }
+                alert(errorMessage);
             }
+        });
+    }
+}
+
         </script>
     @endpush
 @endsection
