@@ -18,7 +18,9 @@ class BookingDetail extends Model
         'booking_total_price', 
         'booking_status', 
         'booking_date', 
-        'users_id'
+        'users_id',
+        'time_slot_id ',
+        'time_slot_stadium_id ',
     ];
 
     // ความสัมพันธ์กับตาราง Stadium
