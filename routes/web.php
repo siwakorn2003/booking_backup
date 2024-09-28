@@ -88,3 +88,7 @@ Route::post('/store-item', [LendingController::class, 'storeItem'])->name('store
 Route::group(['middleware' => 'auth'], function() {
     Route::post('/booking/store', [BookingController::class, 'store'])->name('booking.store');
 });
+
+Route::get('/booking/detai', [BookingController::class, 'showBookingDetail'])->name('booking.detail');
+Route::post('/booking/confirm', [BookingController::class, 'confirmBooking'])->name('booking.confirm');
+
