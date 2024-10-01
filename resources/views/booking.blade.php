@@ -109,63 +109,64 @@
 }
 
 
-    function submitBooking() {
-        const date = document.getElementById('booking-date').value;
-        const selectedStadiums = Object.keys(selectedTimeSlots);
+function submitBooking() {
+    const date = document.getElementById('booking-date').value;
+    const selectedStadiums = Object.keys(selectedTimeSlots);
 
-        if (!date) {
-            alert('กรุณาเลือกวันที่');
-            return;
-        }
-
-        if (selectedStadiums.length === 0) {
-            alert('กรุณาเลือกสนาม');
-            return;
-        }
-
-        let hasSelectedTime = false;
-        for (let stadiumId of selectedStadiums) {
-            if (selectedTimeSlots[stadiumId].length > 0) {
-                hasSelectedTime = true;
-                break;
-            }
-        }
-
-        if (!hasSelectedTime) {
-            alert('กรุณาเลือกช่วงเวลาที่ต้องการจอง');
-            return;
-        }
-
-        const bookingData = {
-            date: date,
-            timeSlots: selectedTimeSlots,
-            _token: '{{ csrf_token() }}'
-        };
-
-        fetch('{{ route('booking.store') }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: JSON.stringify(bookingData)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.login_required) {
-                window.location.href = '{{ route('login') }}'; // Redirect ไปหน้าเข้าสู่ระบบ
-            } else if (data.success) {
-                document.getElementById('booking-result').innerHTML = '<div class="alert alert-success">การจองสำเร็จ</div>';
-                updateSelectedButtons();
-            } else {
-                document.getElementById('booking-result').innerHTML = '<div class="alert alert-danger">' + data.message + '</div>';
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            document.getElementById('booking-result').innerHTML = '<div class="alert alert-danger">เกิดข้อผิดพลาดในการจองสนาม</div>';
-        });
+    if (!date) {
+        alert('กรุณาเลือกวันที่');
+        return;
     }
+
+    if (selectedStadiums.length === 0) {
+        alert('กรุณาเลือกสนาม');
+        return;
+    }
+
+    let hasSelectedTime = false;
+    for (let stadiumId of selectedStadiums) {
+        if (selectedTimeSlots[stadiumId].length > 0) {
+            hasSelectedTime = true;
+            break;
+        }
+    }
+
+    if (!hasSelectedTime) {
+        alert('กรุณาเลือกช่วงเวลาที่ต้องการจอง');
+        return;
+    }
+
+    const bookingData = {
+        date: date,
+        timeSlots: selectedTimeSlots,
+        _token: '{{ csrf_token() }}'
+    };
+
+    fetch('{{ route('booking.store') }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify(bookingData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.login_required) {
+            window.location.href = '{{ route('login') }}'; // Redirect ไปหน้าเข้าสู่ระบบ
+        } else if (data.success) {
+            document.getElementById('booking-result').innerHTML = '<div class="alert alert-success">การจองสำเร็จ</div>';
+            updateSelectedButtons();
+        } else {
+            document.getElementById('booking-result').innerHTML = '<div class="alert alert-danger">' + data.message + '</div>';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('booking-result').innerHTML = '<div class="alert alert-danger">เกิดข้อผิดพลาดในการจองสนาม</div>';
+    });
+}
+
 
 
     function updateSelectedButtons() {

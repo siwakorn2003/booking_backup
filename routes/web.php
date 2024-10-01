@@ -98,5 +98,6 @@ Route::get('/lending/borrow-detail', [LendingController::class, 'borrowDetail'])
     Route::delete('/lending/borrow/{id}', [LendingController::class, 'destroyBorrow'])->name('lending.destroyBorrow');
 
 
-    Route::get('/booking/detail', [BookingController::class, 'showBookingDetail'])->name('bookingdetail');
+    Route::get('/bookingdetail/{bookingId}', [BookingController::class, 'showBookingDetail'])->name('bookingdetail');
+
     

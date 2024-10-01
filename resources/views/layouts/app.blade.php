@@ -51,11 +51,16 @@
                                 <i class="fas fa-calendar-alt me-1"></i> {{ __('จองสนาม') }}
                             </a>
                         </li>
+                        @if(isset($bookings) && $bookings->count() > 0)
+                        @foreach ($bookings as $booking)
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('bookingdetail') }}">
+                            <a class="nav-link" href="{{ route('bookingdetail', $booking->id) }}">
                                 <i class="fas fa-calendar-alt me-1"></i> {{ __('รายละเอียดการจองสนาม') }}
                             </a>
                         </li>
+                        @endforeach
+                    @endif
+                    
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('lending.index') }}">
                                 <i class="fas fa-basketball-ball me-1"></i> {{ __('ยืมอุปกรณ์') }}
@@ -120,6 +125,6 @@
     @stack('scripts')
 
     <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {{-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> --}}
 </body>
 </html>
