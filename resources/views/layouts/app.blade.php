@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,6 +28,7 @@
     <!-- Scripts -->
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
 </head>
+
 <body>
     <div id="app">
         <!-- Navbar -->
@@ -36,7 +38,9 @@
                     <i class="fas fa-football-ball me-2"></i>
                     {{ config('app.name', 'Laravel') }}
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
@@ -51,16 +55,24 @@
                                 <i class="fas fa-calendar-alt me-1"></i> {{ __('จองสนาม') }}
                             </a>
                         </li>
-                        @if(isset($bookings) && $bookings->count() > 0)
-                        @foreach ($bookings as $booking)
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('bookingdetail', $booking->id) }}">
-                                <i class="fas fa-calendar-alt me-1"></i> {{ __('รายละเอียดการจองสนาม') }}
-                            </a>
+                            @if(isset($bookingStadiumId))
+                                <a class="nav-link" href="{{ route('booking.detail', ['id' => $bookingStadiumId]) }}">
+                                    <i class="fas fa-calendar-alt me-1"></i> {{ __('รายละเอียดการจองสนาม') }}
+                                </a>
+                            @else
+                                <span class="nav-link disabled">
+                                    <i class="fas fa-calendar-alt me-1"></i> {{ __('รายละเอียดการจองสนาม') }}
+                                </span>
+                            @endif
                         </li>
-                        @endforeach
-                    @endif
-                    
+                        
+                        
+                      
+                        
+
+
+
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('lending.index') }}">
                                 <i class="fas fa-basketball-ball me-1"></i> {{ __('ยืมอุปกรณ์') }}
@@ -71,7 +83,7 @@
                                 <i class="fas fa-basketball-ball me-1"></i> {{ __('รายละเอียดการยืมอุปกรณ์') }}
                             </a>
                         </li>
-                        
+
 
                         @guest
                             @if (Route::has('login'))
@@ -91,7 +103,8 @@
                             @endif
                         @else
                             <li class="nav-item dropdown">
-                                <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                                <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button"
+                                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
                                     <i class="fas fa-user me-1"></i> {{ Auth::user()->fname }}
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
@@ -99,7 +112,7 @@
                                         <i class="fas fa-edit me-1"></i> {{ __('แก้ไขโปรไฟล์') }}
                                     </a>
                                     <a class="dropdown-item" href="{{ route('logout') }}"
-                                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                         <i class="fas fa-sign-out-alt me-1"></i> {{ __('ออกจากระบบ') }}
                                     </a>
                                     <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
@@ -118,7 +131,7 @@
             @yield('content')
         </main>
 
-       
+
     </div>
 
     <!-- Scripts -->
@@ -127,4 +140,5 @@
     <!-- Bootstrap JS -->
     {{-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> --}}
 </body>
+
 </html>

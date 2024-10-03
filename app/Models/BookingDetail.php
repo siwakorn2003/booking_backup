@@ -19,7 +19,7 @@ class BookingDetail extends Model
         'booking_date', 
         'users_id',
         'time_slot_id',
-        'time_slot_stadium_id',
+        // คอลัมน์ time_slot_stadium_id อาจจะไม่จำเป็น ถ้าไม่ใช้ในการเชื่อมโยง
     ];
 
     // ความสัมพันธ์กับตาราง Stadium
@@ -27,6 +27,7 @@ class BookingDetail extends Model
     {
         return $this->belongsTo(Stadium::class, 'stadium_id');
     }
+    
 
     // ความสัมพันธ์กับตาราง BookingStadium
     public function bookingStadium()
@@ -43,6 +44,6 @@ class BookingDetail extends Model
     // ความสัมพันธ์กับตาราง TimeSlot
     public function timeSlot()
     {
-        return $this->belongsTo(TimeSlot::class, ['time_slot_id', 'time_slot_stadium_id']);
+        return $this->belongsTo(TimeSlot::class, 'time_slot_id'); // ใช้เพียง time_slot_id
     }
 }
