@@ -46,12 +46,23 @@
                             <label for="time_slots" class="form-label">ช่วงเวลา</label>
                             <div id="time-slots-container">
                                 <div class="input-group mb-2">
-                                    <input type="text" class="form-control" name="time_slots[]" placeholder="เวลา เช่น 11:00น.-12:00น." required>
+                                    <select class="form-select" name="start_time[]" required>
+                                        @for ($i = 0; $i <= 23; $i++)
+                                            <option value="{{ sprintf('%02d:00', $i) }}">{{ sprintf('%02d:00', $i) }}</option>
+                                        @endfor
+                                    </select>
+                                    <span class="input-group-text">ถึง</span>
+                                    <select class="form-select" name="end_time[]" required>
+                                        @for ($i = 1; $i <= 24; $i++)
+                                            <option value="{{ sprintf('%02d:00', $i) }}">{{ sprintf('%02d:00', $i) }}</option>
+                                        @endfor
+                                    </select>
                                     <button type="button" class="btn btn-outline-danger remove-time-slot" aria-label="ลบช่วงเวลา">ลบ</button>
                                 </div>
                             </div>
                             <button type="button" class="btn btn-outline-success" id="add-time-slot">เพิ่มช่วงเวลา</button>
                         </div>
+                        
 
                         <button type="submit" class="btn btn-primary">เพิ่มสนาม</button>
                         <a href="{{ route('stadiums.index') }}" class="btn btn-secondary">ยกเลิก</a>
@@ -70,18 +81,66 @@
     const form = document.getElementById('stadium-form');
 
     addButton.addEventListener('click', function() {
-        const div = document.createElement('div');
-        div.classList.add('input-group', 'mb-2');
-        div.innerHTML = `
-            <input type="text" class="form-control" name="time_slots[]" placeholder="เวลา เช่น 11:00น.-12:00น." required>
-            <button type="button" class="btn btn-outline-danger remove-time-slot" aria-label="ลบช่วงเวลา">ลบ</button>
-        `;
-        container.appendChild(div);
+    const div = document.createElement('div');
+    div.classList.add('input-group', 'mb-2');
+    div.innerHTML = `
+        <select class="form-select" name="start_time[]" required>
+            ${generateHourOptions()}
+        </select>
+        <span class="input-group-text">ถึง</span>
+        <select class="form-select" name="end_time[]" required>
+            ${generateHourOptions(true)}
+        </select>
+        <button type="button" class="btn btn-outline-danger remove-time-slot" aria-label="ลบช่วงเวลา">ลบ</button>
+    `;
+
+     // ตรวจสอบการซ้ำของช่วงเวลา
+     if (!checkDuplicateTimeSlots()) {
+            container.appendChild(div); // เพิ่มช่องช่วงเวลาใหม่
+        } else {
+            alert('ช่วงเวลานี้ซ้ำกับที่มีอยู่แล้ว');
+        }
     });
 
+
+
+// ฟังก์ชันสำหรับสร้างตัวเลือกเวลาเป็นชั่วโมง
+function generateHourOptions(end = false) {
+    let options = '';
+    const startHour = end ? 1 : 0;
+    const endHour = end ? 24 : 23;
+
+    for (let i = startHour; i <= endHour; i++) {
+        options += `<option value="${String(i).padStart(2, '0')}:00">${String(i).padStart(2, '0')}:00</option>`;
+    }
+    return options;
+}
+
+// ฟังก์ชันตรวจสอบการซ้ำของช่วงเวลา
+function checkDuplicateTimeSlots() {
+        const startTimes = document.getElementsByName('start_time[]');
+        const endTimes = document.getElementsByName('end_time[]');
+
+        // เก็บช่วงเวลาที่มีอยู่ในรูปแบบของ array
+        const timeSlots = [];
+        for (let i = 0; i < startTimes.length; i++) {
+            const startTime = startTimes[i].value;
+            const endTime = endTimes[i].value;
+
+            if (timeSlots.some(slot => slot.start === startTime && slot.end === endTime)) {
+                return true; // พบช่วงเวลาที่ซ้ำกัน
+            }
+
+            timeSlots.push({ start: startTime, end: endTime });
+        }
+        return false;
+    }
+
+
+    // ลบช่วงเวลา
     container.addEventListener('click', function(event) {
         if (event.target.classList.contains('remove-time-slot')) {
-            // Only remove the time slot if there is more than one
+            // ลบช่วงเวลาเมื่อมีมากกว่า 1
             if (container.children.length > 1) {
                 event.target.parentElement.remove();
             } else {
@@ -90,18 +149,30 @@
         }
     });
 
+    // ตรวจสอบการส่งฟอร์ม
     form.addEventListener('submit', function(event) {
-        const timeSlots = document.getElementsByName('time_slots[]');
-        const timeSlotRegex = /^\d{2}:\d{2}-\d{2}:\d{2}$/; // รูปแบบเวลา
+    const startTimes = document.getElementsByName('start_time[]');
+    const endTimes = document.getElementsByName('end_time[]');
 
-        for (let i = 0; i < timeSlots.length; i++) {
-            if (!timeSlotRegex.test(timeSlots[i].value)) {
-                alert('กรุณากรอกช่วงเวลาในรูปแบบ 00:00-00:00');
-                event.preventDefault(); // หยุดการส่งฟอร์ม
-                return;
-            }
+    for (let i = 0; i < startTimes.length; i++) {
+        const startTime = startTimes[i].value;
+        const endTime = endTimes[i].value;
+
+        if (startTime >= endTime) {
+            alert('กรุณากรอกเวลาที่ถูกต้อง: เวลาเริ่มต้องมาก่อนเวลาสิ้นสุด');
+            event.preventDefault(); // หยุดการส่งฟอร์ม
+            return;
         }
-    });
+    }
+
+     // ตรวจสอบว่ามีช่วงเวลาซ้ำกันหรือไม่
+     if (checkDuplicateTimeSlots()) {
+            alert('มีช่วงเวลาที่ซ้ำกัน กรุณาตรวจสอบ');
+            event.preventDefault(); // หยุดการส่งฟอร์ม
+        }
+
+});
+
 });
 </script>
 @endpush
