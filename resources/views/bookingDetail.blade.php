@@ -3,21 +3,22 @@
 @section('content')
     <main class="py-4">
         <div class="container">
-            <h1 class="d-flex justify-content-between align-items-center">
-                <span>รายละเอียดการจอง</span>
+            <div class="d-flex justify-content-between align-items-center">
+                <h1>รายละเอียดการจอง</h1>
                 @if (isset($groupedBookingDetails) && $groupedBookingDetails->isNotEmpty())
                     <span class="badge bg-info">{{ $groupedBookingDetails->first()['booking_status'] }}</span>
                 @endif
-            </h1>
+            </div>
 
             @if (isset($groupedBookingDetails) && $groupedBookingDetails->isNotEmpty())
                 @php
                     $firstGroup = $groupedBookingDetails->first();
                 @endphp
-                <h2 class="mt-3">
-                    รหัสการจอง:
-                    {{ $firstGroup['booking_stadium_id'] ?? 'ไม่ระบุ' }}
-                </h2>
+                <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded mb-4">
+                    @if($booking_stadium_id)
+                        <p class="mb-0 fw-bold">รหัสการจอง: <span class="text-success">{{ $booking_stadium_id }}</span></p>
+                    @endif
+                </div>
             @endif
 
             @if (session('success'))
@@ -33,7 +34,7 @@
                 </div>
             @elseif ($groupedBookingDetails->isNotEmpty())
                 <!-- ถ้ามีข้อมูลการจอง -->
-                <table class="table table-bordered table-striped">
+                <table class="table table-bordered table-striped mt-4">
                     <thead class="table-light">
                         <tr>
                             <th>สนาม</th>
@@ -41,7 +42,6 @@
                             <th>เวลา</th>
                             <th>ราคา</th>
                             <th>ชั่วโมง</th>
-
                             <th>ลบ</th>
                         </tr>
                     </thead>
@@ -53,11 +53,7 @@
                                 <td>{{ $group['time_slots'] }}</td>
                                 <td>{{ number_format($group['total_price']) }} บาท</td>
                                 <td>{{ $group['total_hours'] }}</td>
-
-
                                 <td>
-                                    {{-- {{ $group['latestBookingStadium'] }} --}}
-
                                     {{-- <button class="btn btn-outline-danger delete-booking" data-id="{{ $group['id'] }}">ลบ</button> --}}
                                 </td>
                             </tr>
@@ -128,14 +124,19 @@
             @endif
 
             <div class="d-flex justify-content-between mt-4">
-                <button class="btn btn-outline-secondary"
-                    onclick="window.location='{{ route('booking') }}'">ย้อนกลับ</button>
+                <button class="btn btn-outline-secondary" onclick="window.location='{{ route('booking') }}'">ย้อนกลับ</button>
                 <div>
-                    {{-- <button class="btn btn-outline-secondary me-2" onclick="window.location='{{ route('lending.index', ['booking_stadium_id' => $bookingDetails[0]->booking_stadium_id]) }}'">ยืมอุปกรณ์</button> --}}
-                    <button class="btn btn-success">ยืนยันการจอง</button>
+                    <div class="text-end">
+                        <!-- ปุ่มยืนยันการจอง -->
+                        @if($booking_stadium_id)
+                            <form action="{{ route('confirmBooking', ['booking_stadium_id' => $booking_stadium_id]) }}" method="POST" class="d-inline">
+                                @csrf
+                                <button type="submit" class="btn btn-success">ยืนยันการจอง</button>
+                            </form>
+                        @endif
+                    </div>
                 </div>
             </div>
-
         </div>
     </main>
 

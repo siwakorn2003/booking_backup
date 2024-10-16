@@ -119,10 +119,10 @@ public function show()
         if ($bookingDetails->isNotEmpty()) {
             $groupedBookingDetails = $bookingDetails->groupBy(function ($item) {
                 return $item->stadium_id . '|' . $item->booking_date;
-            })->map(function ($group) use ($latestBookingStadium) { // ใช้คำสั่ง use ที่นี่
-                $timeSlots = $group->pluck('timeSlot.time_slot')->join(', '); // แก้ไขชื่อให้ถูกต้อง
-                $bookingStatus = $latestBookingStadium->booking_status; // กำหนดค่า booking_status
-                
+            })->map(function ($group) use ($latestBookingStadium) {
+                $timeSlots = $group->pluck('timeSlot.time_slot')->join(', ');
+                $bookingStatus = $latestBookingStadium->booking_status;
+
                 return [
                     'stadium_name' => $group->first()->stadium->stadium_name,
                     'booking_date' => $group->first()->booking_date,
@@ -130,16 +130,14 @@ public function show()
                     'total_price' => $group->sum('booking_total_price'),
                     'total_hours' => $group->sum('booking_total_hour'),
                     'booking_status' => $bookingStatus,
-                    // 'booking_stadium_id' => $booking_stadium_id,
-
-                    
                 ];
             })->values();
         }
-        
-        // ดึงรายละเอียดการยืมอุปกรณ์
-        $borrowingDetails = Borrow::where('booking_stadium_id', $booking_stadium_id)->get(); // แก้ไขการดึงข้อมูล borrowingDetails ให้ตรงกับการจอง
 
+        // ดึงรายละเอียดการยืมอุปกรณ์
+        $borrowingDetails = Borrow::where('booking_stadium_id', $booking_stadium_id)->get();
+
+        // ส่งข้อมูลไปยัง view พร้อมกับรหัสการจอง (ID)
         return view('bookingDetail', compact('groupedBookingDetails', 'borrowingDetails', 'booking_stadium_id'));
     } else {
         // ถ้าไม่มีการจอง ให้แสดงข้อความแจ้งเตือน
@@ -147,6 +145,7 @@ public function show()
         return view('bookingDetail', compact('message', 'booking_stadium_id'));
     }
 }
+
 
     
 
@@ -180,6 +179,25 @@ public function destroy($id)
     return response()->json(['success' => false, 'message' => 'ไม่พบการจอง']);
 }
 
+
+public function confirmBooking($booking_stadium_id)
+{
+    // ค้นหารายการจองที่ต้องการยืนยัน
+    $booking = BookingStadium::find($booking_stadium_id);
+
+    if ($booking && $booking->booking_status === 'รอการชำระเงิน') {
+        // อัปเดตสถานะการจองเป็น 'จองแล้ว'
+        $booking->update(['booking_status' => 'จองแล้ว']);
+
+        // ส่งกลับพร้อมข้อความยืนยัน
+        return redirect()->route('bookingDetail', ['id' => $booking_stadium_id])
+            ->with('success', 'การจองของคุณได้รับการยืนยันเรียบร้อยแล้ว');
+    } else {
+        // ถ้าไม่พบรายการจองหรือสถานะไม่ถูกต้อง ส่งกลับพร้อมข้อผิดพลาด
+        return redirect()->route('bookingDetail', ['id' => $booking_stadium_id])
+            ->with('error', 'ไม่สามารถยืนยันการจองได้');
+    }
+}
 
 
 

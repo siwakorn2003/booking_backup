@@ -6,7 +6,7 @@
         <div class="row justify-content-center">
             <div class="col-12">
                 <div class="card shadow-lg border-0">
-                    <div class="card-header bg-primary text-white text-center">
+                    <div style="background-color:#279a3e;" class="card-header text-white text-center">
                         <h4>{{ __('การจองสนาม') }}</h4>
                     </div>
                     <div class="card-body p-3">
