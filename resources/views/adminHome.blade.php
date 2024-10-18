@@ -16,11 +16,11 @@
                     @endif
 
                     <div class="row">
-                        @foreach ([
-                            ['info', 'การจัดการสมาชิก', 'เพิ่ม ลบ และแก้ไขข้อมูลสมาชิก', route('users.index'), 'จัดการสมาชิก'],
-                            ['success', 'การจองสนาม', 'ดูและจัดการการจองสนามทั้งหมด', route('stadiums.index'), 'จัดการการจอง'],
+                        @foreach ([ 
+                            ['info', 'การจัดการสมาชิก', 'สมาชิกทั้งหมด: ' . $totalUsers . ' คน', route('users.index'), 'จัดการสมาชิก'],
+                            ['success', 'การจองสนาม', 'สนามทั้งหมด: ' . $totalStadiums . ' สนาม', route('stadiums.index'), 'จัดการการจอง'],
                             ['warning', 'สถานะการชำระเงิน', 'ตรวจสอบและอัพเดตสถานะการชำระเงิน', route('home'), 'จัดการสถานะ'],
-                            ['danger', 'การยืมอุปกรณ์', 'ตรวจสอบและจัดการการยืมอุปกรณ์', route('lending.index'), 'จัดการการยืม'],
+                            ['danger', 'การยืมอุปกรณ์', 'อุปกรณ์ทั้งหมด: '. $totalItem . ' ชิ้น' , route('lending.index'), 'จัดการการยืม'],
                         ] as [$color, $title, $text, $link, $buttonText])
                             <div class="col-md-3 mb-3">
                                 <div class="card text-white bg-{{ $color }} shadow-sm">
@@ -33,6 +33,7 @@
                             </div>
                         @endforeach
                     </div>
+                    
                     
   
                     <hr class="my-3">

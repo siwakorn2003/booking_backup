@@ -20,11 +20,30 @@ class LendingController extends Controller
     }
 
     // แสดงรายการอุปกรณ์
-    public function index()
-    {
-        $items = Item::with('itemType')->get();
-        return view('lending.index', compact('items'));
+    public function index(Request $request)
+{
+    $search = $request->get('search');
+    $itemTypeId = $request->get('item_type_id');
+
+    $query = Item::query();
+
+    if ($search) {
+        $query->where('item_name', 'like', '%' . $search . '%');
     }
+
+    if ($itemTypeId) {
+        $query->where('item_type_id', $itemTypeId);
+    }
+
+    $items = $query->paginate(10); // Limit to 10 items per page
+
+    $itemTypes = ItemType::all();
+
+    return view('lending.index', compact('items', 'itemTypes'));
+}
+
+    
+
 
     // แสดงฟอร์มเพิ่มอุปกรณ์
     public function addItem()

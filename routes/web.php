@@ -16,6 +16,7 @@ use App\Http\Controllers\BorrowingController;
 use App\Http\Controllers\StadiumController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\LendingController;
+use App\Http\Controllers\AdminController;
 
 // เส้นทางหลัก
 Route::get('/', function () {
@@ -102,3 +103,6 @@ Route::delete('/booking/{id}', [BookingController::class, 'destroy'])->name('boo
 
 Route::get('/bookingDetail/{id}', [BookingController::class, 'show'])->name('booking.detail');
 Route::post('/confirmBooking/{booking_stadium_id}', [BookingController::class, 'confirmBooking'])->name('confirmBooking');
+
+Route::get('/admin/home', [AdminController::class, 'index'])->name('admin.home');
+

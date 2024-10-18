@@ -22,10 +22,13 @@ class UserController extends Controller
                   ->orWhere('phone', 'like', '%' . $search . '%');
             });
         }
+
+    // คำนวณจำนวนผู้ใช้ทั้งหมด
+        $totalUsers = User::count();
     
         // Paginate the results
         $users = $query->paginate(10); // ดึงผู้ใช้ 10 คนต่อหน้า
-        return view('users.index', compact('users'));
+        return view('users.index', compact('users', 'totalUsers'));
     }
     
     
@@ -113,4 +116,6 @@ class UserController extends Controller
         $user->delete();
         return redirect()->route('users.index')->with('success', 'สมาชิกถูกลบเรียบร้อยแล้ว');
     }
+
+    
 }

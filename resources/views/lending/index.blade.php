@@ -17,6 +17,28 @@
                         <h4>{{ __('รายการอุปกรณ์') }}</h4>
                     </div>
 
+                     <!-- ฟอร์มค้นหาและตัวเลือกประเภทอุปกรณ์ -->
+                     <div class="card-body">
+                        <form method="GET" action="{{ route('lending.index') }}" class="row g-3">
+                            <div class="col-md-6">
+                                <input type="text" name="search" class="form-control" placeholder="ค้นหาอุปกรณ์" value="{{ request()->get('search') }}">
+                            </div>
+                            <div class="col-md-4">
+                                <select name="item_type_id" class="form-control">
+                                    <option value="">{{ __('อุปกรณ์ทั้งหมด') }}</option>
+                                    @foreach($itemTypes as $itemType)
+                                        <option value="{{ $itemType->id }}" {{ request()->get('item_type_id') == $itemType->id ? 'selected' : '' }}>
+                                            {{ $itemType->type_name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary">ค้นหา</button>
+                            </div>
+                        </form>
+                    </div>
+
                     @auth
                         @if (Auth::user()->is_admin)
                             <div class="card-body p-3">
@@ -61,13 +83,11 @@
                                         <td>{{ $item->price }} บาท</td>
                                         <td>{{ $item->borrowed_quantity }}</td>
                                         <td>{{ $item->repair_quantity }}</td>
-                                        <td>{{ $item->item_quantity - $item->borrowed_quantity - $item->repair_quantity }}
-                                        </td>
+                                        <td>{{ $item->item_quantity - $item->borrowed_quantity - $item->repair_quantity }}</td>
                                         <td>
                                             @auth
                                                 @if (!Auth::user()->is_admin)
-                                                    <a href="{{ route('borrow-item', ['item_id' => $item->id]) }}"
-                                                        class="btn btn-primary">
+                                                    <a href="{{ route('borrow-item', ['item_id' => $item->id]) }}" class="btn btn-primary">
                                                         {{ __('ยืม') }}
                                                     </a>
                                                 @endif
@@ -79,14 +99,11 @@
                                             @endauth
                                             @auth
                                                 @if (Auth::user()->is_admin)
-                                                    <a href="{{ route('edit-item', $item->id) }}"
-                                                        class="btn btn-secondary btn-sm d-inline ms-2">แก้ไข</a>
-                                                    <form action="{{ route('delete-item', $item->id) }}" method="POST"
-                                                        class="d-inline ms-2">
+                                                    <a href="{{ route('edit-item', $item->id) }}" class="btn btn-secondary btn-sm d-inline ms-2">แก้ไข</a>
+                                                    <form action="{{ route('delete-item', $item->id) }}" method="POST" class="d-inline ms-2">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit" class="btn btn-danger btn-sm"
-                                                            onclick="return confirm('คุณต้องการลบรายการนี้ใช่หรือไม่?');">ลบ</button>
+                                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('คุณต้องการลบรายการนี้ใช่หรือไม่?');">ลบ</button>
                                                     </form>
                                                 @endif
                                             @endauth
@@ -99,7 +116,32 @@
                                 @endforelse
                             </tbody>
                         </table>
+                    
+                        <!-- Pagination Links -->
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                แสดง {{ $items->count() }} รายการจาก {{ $items->total() }}
+                            </div>
+                            <div class="d-flex">
+                                <div class="me-2">
+                                    @if ($items->onFirstPage())
+                                        <button class="btn btn-secondary" disabled>« ก่อนหน้า</button>
+                                    @else
+                                        <a href="{{ $items->previousPageUrl() }}" class="btn btn-primary">« ก่อนหน้า</a>
+                                    @endif
+                                </div>
+                    
+                                <div>
+                                    @if ($items->hasMorePages())
+                                        <a href="{{ $items->nextPageUrl() }}" class="btn btn-primary">ถัดไป »</a>
+                                    @else
+                                        <button class="btn btn-secondary" disabled>ถัดไป »</button>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
                     </div>
+                    
                 </div>
             </div>
         </div>
