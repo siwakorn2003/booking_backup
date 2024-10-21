@@ -24,7 +24,7 @@ class UserController extends Controller
         }
 
     // คำนวณจำนวนผู้ใช้ทั้งหมด
-        $totalUsers = User::count();
+       
     
         // Paginate the results
         $users = $query->paginate(10); // ดึงผู้ใช้ 10 คนต่อหน้า

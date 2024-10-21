@@ -17,17 +17,19 @@
                         <h4>{{ __('รายการอุปกรณ์') }}</h4>
                     </div>
 
-                     <!-- ฟอร์มค้นหาและตัวเลือกประเภทอุปกรณ์ -->
-                     <div class="card-body">
+                    <!-- ฟอร์มค้นหาและตัวเลือกประเภทอุปกรณ์ -->
+                    <div class="card-body">
                         <form method="GET" action="{{ route('lending.index') }}" class="row g-3">
                             <div class="col-md-6">
-                                <input type="text" name="search" class="form-control" placeholder="ค้นหาอุปกรณ์" value="{{ request()->get('search') }}">
+                                <input type="text" name="search" class="form-control" placeholder="ค้นหาอุปกรณ์"
+                                    value="{{ request()->get('search') }}">
                             </div>
                             <div class="col-md-4">
                                 <select name="item_type_id" class="form-control">
                                     <option value="">{{ __('อุปกรณ์ทั้งหมด') }}</option>
-                                    @foreach($itemTypes as $itemType)
-                                        <option value="{{ $itemType->id }}" {{ request()->get('item_type_id') == $itemType->id ? 'selected' : '' }}>
+                                    @foreach ($itemTypes as $itemType)
+                                        <option value="{{ $itemType->id }}"
+                                            {{ request()->get('item_type_id') == $itemType->id ? 'selected' : '' }}>
                                             {{ $itemType->type_name }}
                                         </option>
                                     @endforeach
@@ -83,13 +85,18 @@
                                         <td>{{ $item->price }} บาท</td>
                                         <td>{{ $item->borrowed_quantity }}</td>
                                         <td>{{ $item->repair_quantity }}</td>
-                                        <td>{{ $item->item_quantity - $item->borrowed_quantity - $item->repair_quantity }}</td>
+                                        <td>{{ $item->item_quantity - $item->borrowed_quantity - $item->repair_quantity }}
+                                        </td>
                                         <td>
                                             @auth
                                                 @if (!Auth::user()->is_admin)
-                                                    <a href="{{ route('borrow-item', ['item_id' => $item->id]) }}" class="btn btn-primary">
-                                                        {{ __('ยืม') }}
-                                                    </a>
+                                                    <a href="{{ route('lending.borrow-equipment', [
+                                                        'itemId' => $item->id, // ID ของอุปกรณ์
+                                                        'bookingDate' => $bookingDate, // วันที่ที่จอง
+                                                        'bookingTime' => $bookingTime, // เวลาที่จอง
+                                                        'stadiumId' => $stadiumId, // ID ของสนาม
+                                                    ]) }}"
+                                                        class="btn btn-primary">ยืมอุปกรณ์</a>
                                                 @endif
                                             @else
                                                 <a href="{{ route('login') }}" class="btn btn-primary"
@@ -99,11 +106,14 @@
                                             @endauth
                                             @auth
                                                 @if (Auth::user()->is_admin)
-                                                    <a href="{{ route('edit-item', $item->id) }}" class="btn btn-secondary btn-sm d-inline ms-2">แก้ไข</a>
-                                                    <form action="{{ route('delete-item', $item->id) }}" method="POST" class="d-inline ms-2">
+                                                    <a href="{{ route('edit-item', $item->id) }}"
+                                                        class="btn btn-secondary btn-sm d-inline ms-2">แก้ไข</a>
+                                                    <form action="{{ route('delete-item', $item->id) }}" method="POST"
+                                                        class="d-inline ms-2">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('คุณต้องการลบรายการนี้ใช่หรือไม่?');">ลบ</button>
+                                                        <button type="submit" class="btn btn-danger btn-sm"
+                                                            onclick="return confirm('คุณต้องการลบรายการนี้ใช่หรือไม่?');">ลบ</button>
                                                     </form>
                                                 @endif
                                             @endauth
@@ -116,7 +126,7 @@
                                 @endforelse
                             </tbody>
                         </table>
-                    
+
                         <!-- Pagination Links -->
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <div>
@@ -130,7 +140,7 @@
                                         <a href="{{ $items->previousPageUrl() }}" class="btn btn-primary">« ก่อนหน้า</a>
                                     @endif
                                 </div>
-                    
+
                                 <div>
                                     @if ($items->hasMorePages())
                                         <a href="{{ $items->nextPageUrl() }}" class="btn btn-primary">ถัดไป »</a>
@@ -141,7 +151,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                 </div>
             </div>
         </div>
@@ -216,6 +226,13 @@
                     alert.style.display = 'none'; // ซ่อนข้อความแจ้งเตือน
                 }
             }, 5000); // 5000 milliseconds = 5 seconds
+
+            
         </script>
+        <!-- Include Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
+
     @endpush
 @endsection

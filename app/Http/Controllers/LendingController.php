@@ -9,6 +9,7 @@ use App\Models\Borrow;
 use App\Models\TimeSlot;
 use App\Models\BorrowDetail; 
 use App\Models\BookingDetail; 
+use App\Models\BookingStadium; 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -37,10 +38,16 @@ class LendingController extends Controller
 
     $items = $query->paginate(10); // Limit to 10 items per page
 
-    $itemTypes = ItemType::all();
+    $itemTypes = ItemType::all(); // ดึงประเภทอุปกรณ์
 
-    return view('lending.index', compact('items', 'itemTypes'));
+    $bookingDate = '2024-10-11'; // ตัวอย่างวันที่
+    $bookingTime = '11:00'; // ตัวอย่างเวลา
+    $stadiumId = 1; // ตัวอย่าง ID สนาม
+
+    return view('lending.borrow-equipment', compact('items', 'itemTypes', 'bookingDate', 'bookingTime', 'stadiumId'));
+
 }
+
 
     
 
@@ -139,117 +146,228 @@ class LendingController extends Controller
         $item->delete();
         return redirect()->route('lending.index')->with('success', 'ลบอุปกรณ์สำเร็จ!');
     }
-
-    public function borrowItem($id)
+    public function borrowItem(Request $request)
 {
-    $item = Item::findOrFail($id);
-    $stadiums = Stadium::with('timeSlots')->get();
-    $borrow_date = now()->format('Y-m-d'); // กำหนดวันที่ยืมเป็นวันที่ปัจจุบัน
-
-    // ดึงข้อมูลการยืมล่าสุดที่เกี่ยวข้องกับผู้ใช้
-    $currentBorrow = Borrow::where('users_id', auth()->user()->id) // ดึงข้อมูลการยืมที่เกี่ยวข้องกับผู้ใช้ที่เข้าสู่ระบบ
-        ->latest() // จัดเรียงจากใหม่ไปเก่า
-        ->first(); // ดึงรายการแรก (ล่าสุด)
-
-    // ตรวจสอบว่ามีการยืมและดึง booking_stadium_id
-    $booking_stadium_id = $currentBorrow ? $currentBorrow->booking_stadium_id : null;
-
-    // ดึงข้อมูล booking details ถ้ามี booking_stadium_id
-    $bookingDetails = $booking_stadium_id ? BookingDetail::where('booking_stadium_id', $booking_stadium_id)->get() : collect();
-
-    // รวมวันที่จาก booking_details
-    $availableDates = [];
-    foreach ($bookingDetails as $detail) {
-        $availableDates[] = $detail->booking_date; // เพิ่มวันที่จองสนามลงใน availableDates
-    }
-
-    return view('lending.borrow-item', compact('item', 'stadiums', 'borrow_date', 'booking_stadium_id', 'availableDates'));
-}
-
-
-    // เก็บข้อมูลการยืม
-    public function storeBorrow(Request $request)
-{
-    // dd($request->all());
-    
+    // ตรวจสอบข้อมูล
     $request->validate([
-        'item_id' => 'required|exists:item,id',
-        'borrow_date' => 'required|date',
+        'stadium_id' => 'required|exists:stadiums,id',
+        'booking_date' => 'required|date',
+        'time_slots' => 'required',
+        'item_id' => 'required|exists:items,id',
         'borrow_quantity' => 'required|integer|min:1',
-        'stadium_id' => 'required|exists:stadium,id',
-        'time_slot_id' => 'required|string', // เปลี่ยนเป็น string เพื่อค้นหา
-        'booking_stadium_id' => 'required|exists:booking_stadium,id', // ตรวจสอบว่ามีการส่ง booking_stadium_id มาด้วย
     ]);
 
-    $item = Item::findOrFail($request->item_id);
+    // สร้างรายการยืม
+    BorrowDetail::create([
+        'stadium_id' => $request->stadium_id,
+        'booking_date' => $request->booking_date,
+        'time_slot_id' => $request->time_slots,
+        'item_id' => $request->item_id,
+        'borrow_quantity' => $request->borrow_quantity,
+        // เพิ่มฟิลด์อื่นๆ ตามที่จำเป็น
+    ]);
 
-    // สมมุติว่าเวลาที่คุณส่งเป็นเวลา 11:00-12:00 และคุณต้องการดึง ID ของ time slot ที่ตรงกัน
-    $timeSlot = TimeSlot::where('time_slot', $request->time_slot_id)->first(); // ค้นหา time_slot ที่ตรงกับเวลา
-
-    if ($timeSlot) {
-        $timeSlotId = $timeSlot->id; // ได้ ID ของ time slot
-    } else {
-        return back()->withErrors(['error' => 'ไม่พบช่วงเวลาที่เลือก']);
-    }
-
-    try {
-        // บันทึกข้อมูลการยืมลงในตาราง borrow
-        $borrow = Borrow::create([
-            'users_id' => auth()->user()->id,
-            'item_id' => $request->item_id,
-            'borrow_date' => $request->borrow_date,
-            'borrow_status' => 'รอการชำระเงิน',
-            'time_slot_id' => $request->time_slot_id,
-            // 'time_slot_id' => $timeSlotId, // ใช้ ID ที่ถูกต้อง
-            'time_slot_stadium_id' => $request->stadium_id,
-            'booking_stadium_id' => $request->booking_stadium_id,
-        ]);
-
-        // ตรวจสอบว่าบันทึกสำเร็จหรือไม่
-        if ($borrow) {
-            // คำนวณรายละเอียดการยืม
-            $totalPrice = $item->price * $request->borrow_quantity; // คำนวณราคา
-            // บันทึกรายละเอียดการยืมลงใน borrow_detail
-            BorrowDetail::create([
-                'borrow_id' => $borrow->id,
-                'item_id' => $item->id,
-                'item_item_type_id' => $item->item_type_id,
-                'borrow_date' => $request->borrow_date,
-                'borrow_quantity' => $request->borrow_quantity,
-                'borrow_total_hour' => 1, // หรือค่าที่คุณต้องการ
-                'borrow_total_price' => $totalPrice,
-                'borrow_status' => 'รอการชำระเงิน',
-                'users_id' => auth()->user()->id,
-                'time_slot_id' => $timeSlotId, // ใช้ ID ที่ถูกต้อง
-                'stadium_id' => $request->stadium_id,
-            ]);
-
-            // ส่งกลับไปยังหน้ารายละเอียด
-            return redirect()->route('booking.detail', ['id' => $request->booking_stadium_id])->with('success', 'ระบบเพิ่มรายการแล้ว โปรดตรวจสอบรายการอีกครั้งก่อนชำระเงิน');
-
-        } else {
-            return redirect()->back()->with('error', 'เกิดข้อผิดพลาด');
-        }
-    } catch (\Exception $e) {
-        return back()->withErrors(['error' => 'เกิดข้อผิดพลาด: ' . $e->getMessage()]);
-    }
+    return redirect()->back()->with('success', 'ยืมอุปกรณ์สำเร็จแล้ว');
 }
+
+
+    // public function storeBorrow(Request $request)
+    // {
+    //     $request->validate([
+    //         'item_id' => 'required|exists:items,id',
+    //         'quantity' => 'required|integer|min:1',
+    //         'booking_stadium_id' => 'required|exists:booking_stadium,id',
+    //         'booking_date' => 'required|date',
+    //         'booking_time' => 'required|string',
+    //         'time_slots' => 'required|string',
+    //     ]);
+    
+    //     // Create a new Borrow record
+    //     $borrow = Borrow::create([
+    //         'user_id' => auth()->id(),
+    //         'booking_stadium_id' => $request->booking_stadium_id,
+    //         'borrow_date' => now(), // Or any other logic for borrow date
+    //         'booking_date' => $request->booking_date,
+    //         'booking_time' => $request->booking_time,
+    //         'time_slots' => $request->time_slots,
+    //     ]);
+    
+    //     // Create BorrowDetail record
+    //     BorrowDetail::create([
+    //         'borrow_id' => $borrow->id,
+    //         'item_id' => $request->item_id,
+    //         'quantity' => $request->quantity,
+    //     ]);
+    
+    //     // Update the item's quantity
+    //     $item = Item::findOrFail($request->item_id);
+    //     $item->item_quantity -= $request->quantity;
+    //     $item->save();
+    
+    //     return redirect()->route('lending.index')->with('success', 'ยืมอุปกรณ์สำเร็จ!');
+    // }
+    
+
+    // public function borrowEquipment(Request $request, $itemId)
+    // {
+    //     // Validate the data sent
+    //     $validated = $request->validate([
+    //         'borrow_quantity' => 'required|integer|min:1',
+    //     ]);
+    
+    //     // Retrieve the logged-in user's information
+    //     $userId = Auth::id();
+    
+    //     // Check if the user has a stadium booking
+    //     $latestBooking = BookingStadium::where('users_id', $userId)
+    //         ->where('booking_status', 'Booked') // Check status
+    //         ->latest()
+    //         ->first();
+    
+    //     if (!$latestBooking) {
+    //         // If no booking exists, return error or redirect
+    //         return redirect()->back()->with('error', 'You do not have a stadium booking yet.');
+    //     }
+    
+    //     // Retrieve the booking and selected equipment information
+    //     $bookingId = $latestBooking->id;
+    //     $items = Item::all(); // Use the itemId passed
+    
+    //     // Extract additional data from the request if needed
+    //     $bookingDate = $request->get('booking_date', $latestBooking->booking_date);
+    //     $bookingTime = $request->get('booking_time', $latestBooking->booking_time);
+    //     $stadiumId = $request->get('stadium_id', $latestBooking->stadium_id);
+    
+    //     // Assume you have this function to fetch time slots
+    //     $time_slots = $this->getTimeSlots();
+    
+    //     return view('lending.borrow-equipment', compact('items', 'bookingId', 'bookingDate', 'bookingTime', 'stadiumId', 'time_slots'));
+    // }
+    
+
 
     
-    public function borrowDetail()
-    {
-        // ดึงข้อมูลการยืมทั้งหมด (หรือปรับให้เหมาะสมตามที่คุณต้องการ)
-        $borrows = Borrow::with('item', 'user', 'details','stadium')->where('users_id', auth()->user()->id)->get(); // ตัวอย่างดึงข้อมูลตามผู้ใช้ที่ล็อกอิน
-        return view('lending.borrow-detail', compact('borrows'));
+
+//     public function borrowItem(Request $request, $id)
+// {
+//     // ตรวจสอบว่ามี booking_id มาหรือไม่
+//     $bookingId = $request->input('booking_id');
+    
+//     // ค้นหาการจองโดยใช้ booking_id
+//     $booking = BookingStadium::with('bookingDetails')->findOrFail($bookingId);
+
+//     $item = Item::findOrFail($id); // ค้นหา Item โดยใช้ $id
+//     $stadiums = Stadium::with('timeSlots')->get(); // ดึงสนามทั้งหมด
+//     $borrow_date = now()->format('Y-m-d'); // วันที่ยืมเป็นวันที่ปัจจุบัน
+
+//     // ดึงข้อมูลการยืมล่าสุดที่เกี่ยวข้องกับผู้ใช้
+//     $currentBorrow = Borrow::where('users_id', auth()->user()->id)
+//         ->latest()
+//         ->first();
+
+//     // ตรวจสอบว่ามีการยืมและดึง booking_stadium_id
+//     $booking_stadium_id = $currentBorrow ? $currentBorrow->booking_stadium_id : null;
+
+//     // ดึงข้อมูล booking details ถ้ามี booking_stadium_id
+//     $bookingDetails = $booking_stadium_id ? BookingDetail::where('booking_stadium_id', $booking_stadium_id)->get() : collect();
+
+//     // ข้อมูลการจอง
+//     $bookingDate = $booking->booking_date; // วันที่จอง
+//     $stadiumId = $booking->stadium_id; // ID สนามจากการจอง
+//     $timeSlots = $booking->time_slots; // ตัวอย่าง
+
+//     return view('lending.borrow-item', compact('item', 'stadiums', 'borrow_date', 'booking_stadium_id', 'bookingDate', 'stadiumId', 'timeSlots', 'bookingDetails'));
+// }
+
+
+
+//     // เก็บข้อมูลการยืม
+//     public function storeBorrow(Request $request)
+// {
+//     // dd($request->all());
+    
+//     $request->validate([
+//         'item_id' => 'required|exists:item,id',
+//         'borrow_date' => 'required|date',
+//         'borrow_quantity' => 'required|integer|min:1',
+//         'stadium_id' => 'required|exists:stadium,id',
+//         'time_slot_id' => 'required|string', // เปลี่ยนเป็น string เพื่อค้นหา
+//         'booking_stadium_id' => 'required|exists:booking_stadium,id', // ตรวจสอบว่ามีการส่ง booking_stadium_id มาด้วย
+//     ]);
+
+//     $item = Item::findOrFail($request->item_id);
+
+//     // สมมุติว่าเวลาที่คุณส่งเป็นเวลา 11:00-12:00 และคุณต้องการดึง ID ของ time slot ที่ตรงกัน
+//     $timeSlot = TimeSlot::where('time_slot', $request->time_slot_id)->first(); // ค้นหา time_slot ที่ตรงกับเวลา
+
+//     if ($timeSlot) {
+//         $timeSlotId = $timeSlot->id; // ได้ ID ของ time slot
+//     } else {
+//         return back()->withErrors(['error' => 'ไม่พบช่วงเวลาที่เลือก']);
+//     }
+
+//     try {
+//         // บันทึกข้อมูลการยืมลงในตาราง borrow
+//         $borrow = Borrow::create([
+//             'users_id' => auth()->user()->id,
+//             'item_id' => $request->item_id,
+//             'borrow_date' => $request->borrow_date,
+//             'borrow_status' => 'รอการชำระเงิน',
+//             'time_slot_id' => $request->time_slot_id,
+//             // 'time_slot_id' => $timeSlotId, // ใช้ ID ที่ถูกต้อง
+//             'time_slot_stadium_id' => $request->stadium_id,
+//             'booking_stadium_id' => $request->booking_stadium_id,
+//         ]);
+
+//         // ตรวจสอบว่าบันทึกสำเร็จหรือไม่
+//         if ($borrow) {
+//             // คำนวณรายละเอียดการยืม
+//             $totalPrice = $item->price * $request->borrow_quantity; // คำนวณราคา
+//             // บันทึกรายละเอียดการยืมลงใน borrow_detail
+//             BorrowDetail::create([
+//                 'borrow_id' => $borrow->id,
+//                 'item_id' => $item->id,
+//                 'item_item_type_id' => $item->item_type_id,
+//                 'borrow_date' => $request->borrow_date,
+//                 'borrow_quantity' => $request->borrow_quantity,
+//                 'borrow_total_hour' => 1, // หรือค่าที่คุณต้องการ
+//                 'borrow_total_price' => $totalPrice,
+//                 'borrow_status' => 'รอการชำระเงิน',
+//                 'users_id' => auth()->user()->id,
+//                 'time_slot_id' => $timeSlotId, // ใช้ ID ที่ถูกต้อง
+//                 'stadium_id' => $request->stadium_id,
+//             ]);
+
+//             // ส่งกลับไปยังหน้ารายละเอียด
+//             return redirect()->route('booking.detail', ['id' => $request->booking_stadium_id])->with('success', 'ระบบเพิ่มรายการแล้ว โปรดตรวจสอบรายการอีกครั้งก่อนชำระเงิน');
+
+//         } else {
+//             return redirect()->back()->with('error', 'เกิดข้อผิดพลาด');
+//         }
+//     } catch (\Exception $e) {
+//         return back()->withErrors(['error' => 'เกิดข้อผิดพลาด: ' . $e->getMessage()]);
+//     }
+// }
+
+    
+//     public function borrowDetail()
+//     {
+//         // ดึงข้อมูลการยืมทั้งหมด (หรือปรับให้เหมาะสมตามที่คุณต้องการ)
+//         $borrows = Borrow::with('item', 'user', 'details','stadium')->where('users_id', auth()->user()->id)->get(); // ตัวอย่างดึงข้อมูลตามผู้ใช้ที่ล็อกอิน
+
+//           // สมมุติว่าเราจะส่งอุปกรณ์แรกจากการยืม
+//     $item = $borrows->isNotEmpty() ? $borrows->first()->item : null;
+
+//         return view('booking.detail', compact('borrows'));
         
-    }
+//     }
 
-    public function destroyBorrow($id)
-{
-    $borrow = Borrow::findOrFail($id);
-    $borrow->delete(); // ลบรายการการยืม
+//     public function destroyBorrow($id)
+// {
+//     $borrow = Borrow::findOrFail($id);
+//     $borrow->delete(); // ลบรายการการยืม
 
-    return redirect()->route('lending.borrow-detail')->with('success', 'ลบรายการยืมสำเร็จ!');
-}
+//     return redirect()->route('booking.detail')->with('success', 'ลบรายการยืมสำเร็จ!');
+// }
 
 }    
