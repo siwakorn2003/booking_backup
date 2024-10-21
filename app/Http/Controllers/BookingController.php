@@ -127,7 +127,8 @@ public function show()
                 $bookingStatus = $latestBookingStadium->booking_status;
 
                 return [
-                    'id' => $group->first()->booking_stadium_id, // เพิ่มบรรทัดนี้
+                    'id' => $group->first()->booking_stadium_id, 
+                    'stadium_id' => $group->first()->stadium_id,
                     'stadium_name' => $group->first()->stadium->stadium_name,
                     'booking_date' => $group->first()->booking_date,
                     'time_slots' => $timeSlots,

@@ -59,10 +59,12 @@
                                     data-bs-target="#lendingModal"
                                     data-stadium-name="{{ $group['stadium_name'] }}"
                                     data-booking-date="{{ $group['booking_date'] }}"
-                                    data-time-slots="{{ $group['time_slots'] }}">
+                                    data-time-slots="{{ $group['time_slots'] }}"
+                                    data-stadium-id="{{ $group['stadium_id'] }}"> <!-- เพิ่ม data-stadium-id -->
                                     ยืมอุปกรณ์
                                 </button>
                             </td>
+                            
                             
                             
                             
@@ -215,25 +217,24 @@
         });
 
         // เมื่อ modal ถูกเปิด
-$('#lendingModal').on('show.bs.modal', function (event) {
-    var button = $(event.relatedTarget); // ปุ่มที่ถูกคลิกเพื่อเปิด modal
-    var stadiumName = button.data('stadium-name'); // ดึงข้อมูลชื่อสนาม
-    var bookingDate = button.data('booking-date'); // ดึงข้อมูลวันที่จอง
-    var timeSlots = button.data('time-slots'); // ดึงข้อมูลช่วงเวลา
+  // เมื่อคลิกปุ่มยืมอุปกรณ์
+  $('.btn.btn-primary[data-bs-toggle="modal"]').on('click', function() {
+            var stadiumName = $(this).data('stadium-name');
+            var bookingDate = $(this).data('booking-date');
+            var timeSlots = $(this).data('time-slots');
 
-    // ค้นหา modal และแสดงข้อมูล
-    var modal = $(this);
-    modal.find('.stadium-name').text(stadiumName); // แสดงชื่อสนาม
-    modal.find('#booking_date_display').text(bookingDate); // แสดงวันที่จอง
-    modal.find('#time_slots_display').text(timeSlots); // แสดงช่วงเวลา
+            // แสดงข้อมูลใน modal
+            $('#lendingModal').find('.stadium-name').text(stadiumName);
+            $('#lendingModal').find('#booking_date_display').text(bookingDate);
+            $('#lendingModal').find('#time_slots_display').text(timeSlots);
 
-    // ตั้งค่า input hidden ในฟอร์ม
-    modal.find('#stadium_id').val(button.data('stadium-id')); // ตั้งค่า stadium_id
-    modal.find('#booking_date').val(bookingDate); // ตั้งค่า booking_date
-    modal.find('#time_slots').val(timeSlots); // ตั้งค่า time_slots
-});
+            // อัปเดตค่า hidden input ในฟอร์ม
+            $('#stadium_id').val($(this).data('stadium-id')); // แก้ไขเพื่อเก็บ stadium ID หากมี
+            $('#booking_date').val(bookingDate); // เก็บวันที่จอง
+            $('#time_slots').val(timeSlots); // เก็บช่วงเวลา
 
-
+        });
+    
 
     </script>
 
@@ -248,17 +249,15 @@ $('#lendingModal').on('show.bs.modal', function (event) {
             <div class="modal-body">
                 <form action="{{ route('lending.borrowItem') }}" method="POST" id="lendingForm">
                     @csrf
-                    <!-- ส่งข้อมูลที่จำเป็น เช่น stadium_id, booking_date, และ time_slots -->
-                    <input type="hidden" name="stadium_id" id="stadium_id" value="{{ $booking->stadium_id ?? '' }}">
-                    <input type="hidden" name="booking_date" id="booking_date" value="{{ $booking->booking_date ?? '' }}">
-                    <input type="hidden" name="time_slots" id="time_slots" value="{{ $booking->time_slots ?? '' }}">
-
-                    <!-- แสดงรายละเอียดการจอง -->
+                    <input type="hidden" name="stadium_id" id="stadium_id" value="">
+                    <input type="hidden" name="booking_date" id="booking_date" value="">
+                    <input type="hidden" name="time_slots" id="time_slots" value="">
+            
                     <div class="border p-3 mb-3">
                         <h6>รายละเอียดการจอง</h6>
-                        <p><strong>สนามที่ยืมอุปกรณ์:</strong> <span class="stadium-name">{{ $group['stadium_name'] ?? 'ไม่มีข้อมูล' }}</span></p>
-                        <p><strong>วันที่จองและยืม:</strong> <span id="booking_date_display">{{ $group['booking_date'] ?? 'ไม่มีข้อมูล' }}</span></p>
-                        <p><strong>ช่วงเวลาที่จองและยืม:</strong> <span id="time_slots_display">{{ $group['time_slots'] ?? 'ไม่มีข้อมูล' }}</span></p>
+                        <p><strong>สนามที่ยืมอุปกรณ์:</strong> <span class="stadium-name"></span></p>
+                        <p><strong>วันที่จองและยืม:</strong> <span id="booking_date_display"></span></p>
+                        <p><strong>ช่วงเวลาที่จองและยืม:</strong> <span id="time_slots_display"></span></p>
                     </div>
                     
                     
