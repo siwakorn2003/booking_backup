@@ -51,13 +51,23 @@
 </div>
 
 <script>
+    // รอให้เนื้อหาในหน้าเว็บทั้งหมดโหลดเสร็จสมบูรณ์ก่อนทำงาน
     document.addEventListener('DOMContentLoaded', function() {
+        
+        // ค้นหาองค์ประกอบที่มี id เป็น 'success-message' (ข้อความแจ้งเตือนความสำเร็จ)
         var successMessage = document.getElementById('success-message');
+        
+        // ตรวจสอบว่าพบข้อความแจ้งเตือนหรือไม่ (ถ้าพบจะทำงานต่อ)
         if (successMessage) {
+            
+            // ตั้งเวลาให้ข้อความแจ้งเตือนแสดงเป็นเวลา 5 วินาที (5000 มิลลิวินาที)
             setTimeout(function() {
+                
+                // ซ่อนข้อความแจ้งเตือนโดยการเปลี่ยนค่า display เป็น 'none'
                 successMessage.style.display = 'none';
-            }, 5000);
+            }, 5000); // ระยะเวลาคือ 5000 มิลลิวินาที หรือ 5 วินาที
         }
     });
 </script>
+
 @endsection

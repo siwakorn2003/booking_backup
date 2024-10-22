@@ -141,56 +141,65 @@
     </main>
 
     <!-- JavaScript ส่วนจัดการลบข้อมูลแบบ AJAX -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            // เมื่อคลิกปุ่มลบการจอง
-            $('.delete-booking').on('click', function(e) {
-                e.preventDefault();
-                var bookingId = $(this).data('id');
-                var row = $('#booking-row-' + bookingId);
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- โหลด jQuery -->
+<script>
+    $(document).ready(function() {
+        // เมื่อคลิกปุ่มลบการจอง (จองสนาม)
+        $('.delete-booking').on('click', function(e) {
+            e.preventDefault(); // ป้องกันการทำงานปกติของลิงก์หรือปุ่ม
+            var bookingId = $(this).data('id'); // ดึงค่า bookingId จาก data-id ในปุ่มที่กด
+            var row = $('#booking-row-' + bookingId); // หาแถว (row) ของข้อมูลการจองที่ต้องการลบ
 
-                if (confirm('คุณแน่ใจที่จะลบรายการนี้?')) {
-                    $.ajax({
-                        url: '/booking/' + bookingId,
-                        type: 'DELETE',
-                        data: {
-                            _token: '{{ csrf_token() }}'
-                        },
-                        success: function(response) {
-                            row.remove();
-                            alert('ลบรายการจองสำเร็จ');
-                        },
-                        error: function(xhr) {
-                            alert('เกิดข้อผิดพลาดในการลบข้อมูล');
-                        }
-                    });
-                }
-            });
-
-            // เมื่อคลิกปุ่มลบการยืม
-            $('.delete-borrow').on('click', function(e) {
-                e.preventDefault();
-                var borrowId = $(this).data('id');
-                var row = $('#borrow-row-' + borrowId);
-
-                if (confirm('คุณแน่ใจที่จะลบรายการนี้?')) {
-                    $.ajax({
-                        url: '/lending/borrow/' + borrowId, // เส้นทางสำหรับลบการยืม
-                        type: 'DELETE',
-                        data: {
-                            _token: '{{ csrf_token() }}'
-                        },
-                        success: function(response) {
-                            row.remove();
-                            alert('ลบรายการยืมสำเร็จ');
-                        },
-                        error: function(xhr) {
-                            alert('เกิดข้อผิดพลาดในการลบข้อมูล');
-                        }
-                    });
-                }
-            });
+            // ยืนยันกับผู้ใช้ก่อนที่จะลบข้อมูล
+            if (confirm('คุณแน่ใจที่จะลบรายการนี้?')) {
+                // ส่งคำขอ AJAX เพื่อทำการลบข้อมูลการจอง
+                $.ajax({
+                    url: '/booking/' + bookingId, // URL ของคำขอลบข้อมูล (ระบุ bookingId ที่ต้องการลบ)
+                    type: 'DELETE', // ประเภทของคำขอ HTTP คือ DELETE
+                    data: {
+                        _token: '{{ csrf_token() }}' // ส่งค่า CSRF token เพื่อยืนยันความปลอดภัย
+                    },
+                    success: function(response) {
+                        // หากลบข้อมูลสำเร็จ, ลบแถว (row) ของข้อมูลในตารางออก
+                        row.remove();
+                        alert('ลบรายการจองสำเร็จ'); // แสดงข้อความแจ้งเตือน
+                    },
+                    error: function(xhr) {
+                        // หากเกิดข้อผิดพลาดในการลบข้อมูล
+                        alert('เกิดข้อผิดพลาดในการลบข้อมูล');
+                    }
+                });
+            }
         });
-    </script>
+
+        // เมื่อคลิกปุ่มลบการยืม (ยืมอุปกรณ์)
+        $('.delete-borrow').on('click', function(e) {
+            e.preventDefault(); // ป้องกันการทำงานปกติของลิงก์หรือปุ่ม
+            var borrowId = $(this).data('id'); // ดึงค่า borrowId จาก data-id ในปุ่มที่กด
+            var row = $('#borrow-row-' + borrowId); // หาแถว (row) ของข้อมูลการยืมที่ต้องการลบ
+
+            // ยืนยันกับผู้ใช้ก่อนที่จะลบข้อมูล
+            if (confirm('คุณแน่ใจที่จะลบรายการนี้?')) {
+                // ส่งคำขอ AJAX เพื่อทำการลบข้อมูลการยืม
+                $.ajax({
+                    url: '/lending/borrow/' + borrowId, // URL ของคำขอลบข้อมูลการยืม (ระบุ borrowId ที่ต้องการลบ)
+                    type: 'DELETE', // ประเภทของคำขอ HTTP คือ DELETE
+                    data: {
+                        _token: '{{ csrf_token() }}' // ส่งค่า CSRF token เพื่อยืนยันความปลอดภัย
+                    },
+                    success: function(response) {
+                        // หากลบข้อมูลสำเร็จ, ลบแถว (row) ของข้อมูลในตารางออก
+                        row.remove();
+                        alert('ลบรายการยืมสำเร็จ'); // แสดงข้อความแจ้งเตือน
+                    },
+                    error: function(xhr) {
+                        // หากเกิดข้อผิดพลาดในการลบข้อมูล
+                        alert('เกิดข้อผิดพลาดในการลบข้อมูล');
+                    }
+                });
+            }
+        });
+    });
+</script>
+
 @endsection
