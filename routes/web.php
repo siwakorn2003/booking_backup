@@ -66,7 +66,8 @@ Route::get('/lending/index', [LendingController::class, 'index'])->name('lending
 // เส้นทางสำหรับการยืมอุปกรณ์ รองรับพารามิเตอร์วันที่ (เฉพาะผู้ใช้ที่ล็อกอินเท่านั้นที่สามารถยืมได้)
 // Route::get('/lending/borrow-item/{id}', [LendingController::class, 'borrowItem'])->name('lending.borrow-item')
 //     ->middleware('auth');
-    Route::post('/lending/borrow-item', [LendingController::class, 'borrowItem'])->name('lending.borrowItem');
+Route::post('/borrow-item', [LendingController::class, 'borrowItem'])->name('borrow.item');
+
 
 
 

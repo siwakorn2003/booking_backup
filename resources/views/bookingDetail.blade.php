@@ -1,4 +1,13 @@
 @extends('layouts.app')
+@if ($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
 
 @section('content')
     <main class="py-4">
@@ -32,7 +41,7 @@
                 <div class="alert alert-info">
                     {{ $message }}
                 </div>
-            @elseif ($groupedBookingDetails->isNotEmpty())
+            @elseif ($groupedBookingDetails->Empty())
                 <!-- ถ้ามีข้อมูลการจอง -->
                 <table class="table table-bordered table-striped mt-4">
                     <thead class="table-light">
@@ -78,20 +87,20 @@
             @endif
 
             <!-- แสดงรายละเอียดการยืมด้านล่าง -->
-            @if ($borrowingDetails->isNotEmpty())
+            @if ($borrowingDetails->Empty())
                 <h2 class="mt-5">รายละเอียดการยืมอุปกรณ์</h2>
                 <table class="table table-bordered table-striped">
                     <thead class="table-light">
                         <tr>
                             <th>รหัสการยืม</th>
-                            <th>ชื่อจริง</th>
+
                             <th>ชื่ออุปกรณ์</th>
                             <th>สนามที่ใช้</th>
                             <th>วันที่ยืม</th>
                             <th>เวลา</th>
                             <th>จำนวน</th>
                             <th>ราคา</th>
-                            <th>สถานะ</th>
+                            
                             <th>ลบ</th>
                         </tr>
                     </thead>
@@ -101,7 +110,7 @@
                                 <!-- วนลูปเพื่อแสดงรายละเอียด -->
                                 <tr id="borrow-row-{{ $borrow->id }}">
                                     <td>{{ $borrow->id }}</td>
-                                    <td>{{ $borrow->user->fname }}</td>
+                                   
                                     <td>{{ $detail->item->item_name }}</td>
                                     <td>{{ $detail->stadium->stadium_name }}</td>
                                     <td>{{ $borrow->borrow_date }}</td>
@@ -115,7 +124,7 @@
                                     </td>
                                     <td>{{ $detail->borrow_quantity }}</td>
                                     <td>{{ number_format($detail->borrow_total_price) }} บาท</td>
-                                    <td>{{ $borrow->borrow_status }}</td>
+                                    
                                     <td>
                                         <button class="btn btn-outline-danger delete-borrow"
                                             data-id="{{ $borrow->id }}">ลบ</button>
@@ -125,23 +134,10 @@
                         @endforeach
                     </tbody>
                 </table>
-            @else
-                <p>ยังไม่มีการยืมอุปกรณ์</p>
+           
             @endif
 
-            <!-- เงื่อนไขสำหรับปุ่มยืมอุปกรณ์ -->
-            @if (!empty($bookingDetails) && $bookingDetails->isNotEmpty())
-                <h3 class="mt-3">สามารถยืมอุปกรณ์ได้</h3>
-                <!-- ปุ่มไปหน้ายืมอุปกรณ์ -->
-                <div class="text-end">
-
-                </div>
-            @else
-                <p>คุณต้องจองสนามก่อนนะ ถึงจะสามารถยืมอุปกรณ์ได้</p>
-                <div class="text-end">
-                    <a href="{{ route('booking') }}" class="btn btn-warning">ไปจองสนาม</a>
-                </div>
-            @endif
+          
 
 
             <div class="d-flex justify-content-between mt-4">
@@ -247,7 +243,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form action="{{ route('lending.borrowItem') }}" method="POST" id="lendingForm">
+                <form action="{{ route('borrow.item') }}" method="POST" id="lendingForm">
                     @csrf
                     <input type="hidden" name="stadium_id" id="stadium_id" value="">
                     <input type="hidden" name="booking_date" id="booking_date" value="">
@@ -279,34 +275,38 @@
                             </thead>
                             <tbody>
                                 @forelse($items as $item)
-                                    <tr>
-                                        <td>{{ $item->item_code }}</td>
-                                        <td>{{ $item->item_name }}</td>
-                                        <td>
-                                            @if ($item->item_picture)
-                                                <img src="{{ asset('storage/images/' . $item->item_picture) }}"
-                                                    alt="{{ $item->item_name }}" class="img-thumbnail"
-                                                    style="max-width: 100px; max-height: 100px; object-fit: cover;">
-                                            @else
-                                                <span>ไม่มีรูปภาพ</span>
-                                            @endif
-                                        </td>
-                                        <td>{{ $item->itemType->type_name }}</td>
-                                        <td>{{ $item->price }} บาท</td>
-                                        <td>{{ $item->borrowed_quantity }}</td>
-                                        <td>{{ $item->repair_quantity }}</td>
-                                        <td>{{ $item->item_quantity - $item->borrowed_quantity - $item->repair_quantity }}</td>
-                                        <td>
-                                            <input type="number" name="item_quantity[{{ $item->id }}]" min="1" 
-                                                   max="{{ $item->item_quantity - $item->borrowed_quantity - $item->repair_quantity }}"
-                                                   placeholder="จำนวน" class="form-control" style="width: 100px;">
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="9" class="text-center">{{ __('ไม่พบรายการอุปกรณ์') }}</td>
-                                    </tr>
-                                @endforelse
+                                <tr>
+                                    <td>{{ $item->item_code }}</td>
+                                    <td>{{ $item->item_name }}</td>
+                                    <td>
+                                        @if ($item->item_picture)
+                                            <img src="{{ asset('storage/images/' . $item->item_picture) }}"
+                                                 alt="{{ $item->item_name }}" class="img-thumbnail"
+                                                 style="max-width: 100px; max-height: 100px; object-fit: cover;">
+                                        @else
+                                            <span>ไม่มีรูปภาพ</span>
+                                        @endif
+                                    </td>
+                                    <td>{{ $item->itemType->type_name }}</td>
+                                    <td>{{ $item->price }} บาท</td>
+                                    <td>{{ $item->borrowed_quantity }}</td>
+                                    <td>{{ $item->repair_quantity }}</td>
+                                    <td>{{ $item->borrow_quantity - $item->borrowed_quantity - $item->repair_quantity }}</td>
+                                    <td>
+                                        <!-- Include a hidden field for the item ID -->
+                                        <input type="hidden" name="item_id[]" value="{{ $item->id }}">
+                                        <input type="number" name="borrow_quantity[]" min="0" value="0" 
+                                               max="{{ $item->item_quantity - $item->borrowed_quantity - $item->repair_quantity }}"
+                                               placeholder="จำนวน" class="form-control" style="width: 100px;">
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="9" class="text-center">{{ __('ไม่พบรายการอุปกรณ์') }}</td>
+                                </tr>
+                            @endforelse
+                            
+
                             </tbody>
                         </table>
                     </div>
