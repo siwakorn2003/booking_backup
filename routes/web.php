@@ -16,6 +16,7 @@ use App\Http\Controllers\BorrowingController;
 use App\Http\Controllers\StadiumController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\LendingController;
+use App\Http\Controllers\PaymentController;
 
 // เส้นทางหลัก
 Route::get('/', function () {
@@ -99,8 +100,11 @@ Route::get('/lending/borrow-detail', [LendingController::class, 'borrowDetail'])
 Route::delete('/lending/borrow/{id}', [LendingController::class, 'destroyBorrow'])->name('lending.destroyBorrow');
 
 
-// Route::get('/bookingDetail/{id}', [BookingController::class, 'show'])->name('booking.detail');
-Route::delete('/booking/{id}', [BookingController::class, 'destroy'])->name('booking.destroy');
+
 
 Route::get('/bookingDetail/{id}', [BookingController::class, 'show'])->name('booking.detail');
 Route::post('/confirmBooking/{booking_stadium_id}', [BookingController::class, 'confirmBooking'])->name('confirmBooking');
+
+
+Route::get('/payment-booking/{booking_stadium_id}', [PaymentController::class, 'showPaymentForm'])->name('paymentBooking');
+Route::post('/process-payment', [PaymentController::class, 'processPayment'])->name('processPayment');

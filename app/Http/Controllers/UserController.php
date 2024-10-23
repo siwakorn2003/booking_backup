@@ -28,7 +28,7 @@ class UserController extends Controller
     
         // Paginate the results
         $users = $query->paginate(10); // ดึงผู้ใช้ 10 คนต่อหน้า
-        return view('users.index', compact('users', 'totalUsers'));
+        return view('users.index', compact('users'));
     }
     
     

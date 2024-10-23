@@ -15,7 +15,7 @@
             <div class="d-flex justify-content-between align-items-center">
                 <h1>รายละเอียดการจอง</h1>
                 @if (isset($groupedBookingDetails) && $groupedBookingDetails->isNotEmpty())
-                    <span class="badge bg-info">{{ $groupedBookingDetails->first()['booking_status'] }}</span>
+                    <span style="padding:10px; font-size:15px;" class="badge bg-info">{{ $groupedBookingDetails->first()['booking_status'] }}</span>
                 @endif
             </div>
 
@@ -51,6 +51,7 @@
                             <th>เวลา</th>
                             <th>ราคา</th>
                             <th>ชั่วโมง</th>
+                            <th>ยืมอุปกรณ์</th>
                             <th>ลบ</th>
                         </tr>
                     </thead>
@@ -87,55 +88,69 @@
             @endif
 
             <!-- แสดงรายละเอียดการยืมด้านล่าง -->
-            @if ($borrowingDetails->Empty())
-                <h2 class="mt-5">รายละเอียดการยืมอุปกรณ์</h2>
-                <table class="table table-bordered table-striped">
-                    <thead class="table-light">
-                        <tr>
-                            <th>รหัสการยืม</th>
+@if ($borrowingDetails->isNotEmpty())
+<h2 class="mt-5">รายละเอียดการยืมอุปกรณ์</h2>
+<table class="table table-bordered table-striped">
+    <thead class="table-light">
+        <tr>
+            <th>รหัสการยืม</th>
+            <th>ชื่ออุปกรณ์</th>
+            <th>สนามที่ใช้</th>
+            <th>วันที่ยืม</th>
+            <th>เวลา</th>
+            <th>จำนวน</th>
+            <th>ราคา</th>
+            <th>ลบ</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach ($borrowingDetails as $borrow)
+            @php
+                $groupedDetails = []; // สร้าง array สำหรับเก็บรายละเอียดที่กลุ่ม
+                foreach ($borrow->details as $detail) {
+                    $key = $detail->item->id . '-' . $detail->stadium->id . '-' . $borrow->borrow_date; // สร้างคีย์สำหรับกลุ่ม
+                    if (!isset($groupedDetails[$key])) {
+                        $groupedDetails[$key] = [
+                            'borrow' => $borrow,
+                            'item_name' => $detail->item->item_name,
+                            'stadium_name' => $detail->stadium->stadium_name,
+                            'time_slots' => [$detail->timeSlot ? $detail->timeSlot->time_slot : 'ไม่มีข้อมูลเวลา'], // ใช้ array เพื่อเก็บช่วงเวลา
+                            'total_quantity' => $detail->borrow_quantity,
+                            'total_price' => $detail->borrow_total_price,
+                        ];
+                    } else {
+                        // ถ้าซ้ำ ให้เพิ่มจำนวนและราคา
+                        $groupedDetails[$key]['total_quantity'] += $detail->borrow_quantity;
+                        $groupedDetails[$key]['total_price'] += $detail->borrow_total_price;
+                        // รวมช่วงเวลาทั้งหมด
+                        if ($detail->timeSlot) {
+                            $groupedDetails[$key]['time_slots'][] = $detail->timeSlot->time_slot;
+                        }
+                    }
+                }
+            @endphp
 
-                            <th>ชื่ออุปกรณ์</th>
-                            <th>สนามที่ใช้</th>
-                            <th>วันที่ยืม</th>
-                            <th>เวลา</th>
-                            <th>จำนวน</th>
-                            <th>ราคา</th>
-                            
-                            <th>ลบ</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($borrowingDetails as $borrow)
-                            @foreach ($borrow->details as $detail)
-                                <!-- วนลูปเพื่อแสดงรายละเอียด -->
-                                <tr id="borrow-row-{{ $borrow->id }}">
-                                    <td>{{ $borrow->id }}</td>
-                                   
-                                    <td>{{ $detail->item->item_name }}</td>
-                                    <td>{{ $detail->stadium->stadium_name }}</td>
-                                    <td>{{ $borrow->borrow_date }}</td>
-                                    <td>
-                                        @if ($detail->timeSlot)
-                                            <!-- ตรวจสอบว่ามีข้อมูลเวลา -->
-                                            {{ $detail->timeSlot->time_slot }} <!-- แสดงช่วงเวลาจาก time slot -->
-                                        @else
-                                            ไม่มีข้อมูลเวลา
-                                        @endif
-                                    </td>
-                                    <td>{{ $detail->borrow_quantity }}</td>
-                                    <td>{{ number_format($detail->borrow_total_price) }} บาท</td>
-                                    
-                                    <td>
-                                        <button class="btn btn-outline-danger delete-borrow"
-                                            data-id="{{ $borrow->id }}">ลบ</button>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        @endforeach
-                    </tbody>
-                </table>
-           
-            @endif
+            @foreach ($groupedDetails as $group)
+                <tr id="borrow-row-{{ $group['borrow']->id }}">
+                    <td>{{ $group['borrow']->id }}</td>
+                    <td>{{ $group['item_name'] }}</td>
+                    <td>{{ $group['stadium_name'] }}</td>
+                    <td>{{ $group['borrow']->borrow_date }}</td>
+                    <td>{{ implode(', ', $group['time_slots']) }}</td> <!-- รวมช่วงเวลาเป็น string -->
+                    <td>{{ $group['total_quantity'] }}</td>
+                    <td>{{ number_format($group['total_price']) }} บาท</td>
+                    <td>
+                        <button class="btn btn-outline-danger delete-borrow" data-id="{{ $group['borrow']->id }}">ลบ</button>
+                    </td>
+                </tr>
+            @endforeach
+        @endforeach
+    </tbody>
+</table>
+@endif
+
+
+        
 
           
 
