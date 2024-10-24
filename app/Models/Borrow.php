@@ -16,6 +16,7 @@ class Borrow extends Model
         'borrow_date',
         'users_id',
         'booking_stadium_id', // คอลัมน์ใหม่ที่เพิ่มเข้ามา
+        'borrow_status'
     ];
 
     // สัมพันธ์กับตาราง Item (ถ้ามีความสัมพันธ์แบบอื่น)

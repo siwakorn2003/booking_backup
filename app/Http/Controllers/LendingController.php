@@ -160,6 +160,7 @@ class LendingController extends Controller
         'item_id.*' => 'exists:item,id',
         'borrow_quantity' => 'required|array',
         'borrow_quantity.*' => 'integer|min:0',
+        
     ]);
 
     // ดึงข้อมูลการจองจาก booking_stadium
@@ -184,6 +185,7 @@ class LendingController extends Controller
         'borrow_date' => $request->booking_date,
         'users_id' => auth()->id(),
         'booking_stadium_id' => $bookingStadium->id,
+        'borrow_status' => 'รอการชำระเงิน',
     ]);
 
     // วนลูปสร้างรายการยืมสำหรับแต่ละ item

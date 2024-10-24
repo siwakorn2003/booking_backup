@@ -9,8 +9,9 @@
             <p class="lead">สามารถจองได้เลยเวลานี้!</p>
             <button class="custom-btn">
                 <a href="{{ route('booking') }}" style="color: inherit; text-decoration: none;">
-                   {{ __('จองสนาม') }}
-                </a>
+                    {{ __('จองสนาม') }}
+                 </a>
+ 
             </button>
             </div>
     </header>
@@ -71,7 +72,7 @@
         <div class="rules-section bg-light p-4 rounded shadow mt-4">
             <h4 class="text-primary">การใช้สนาม</h4>
             <ul class="pl-3" style="list-style-type: disc;">
-                <li>กรุณารักษาเวลาการจองใช้สนาม</li>
+                <li>กรุณารักษาเวลาการจองสนามและใช้สนาม</li>
                 <li>กรุณาสวมเครื่องแต่งกายชุดกีฬา และสวมรองเท้ากีฬาเท่านั้น</li>
                 <li>ไม่อนุญาตให้นำสัตว์เลี้ยงเข้าภายในสนามและบริเวณคลับเฮาส์</li>
                 <li>ห้ามสูบบุหรี่ภายในสนามโดยเด็ดขาด สูบบุหรี่ในสนามปรับ 2,000 บาท สามารถสูบบุหรี่ในบริเวณที่จัดไว้ให้เท่านั้น</li>
@@ -171,6 +172,11 @@
         padding: 20px; /* เพิ่ม padding */
         border-radius: 8px; /* เพิ่มมุมโค้งให้กับส่วนระเบียบ */
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* เพิ่มเงาให้กับส่วนระเบียบ */
+
+        
     }
+   
+   
+
 </style>
 @endsection
