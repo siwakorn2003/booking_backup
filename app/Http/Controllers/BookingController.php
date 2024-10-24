@@ -193,7 +193,7 @@ public function showLendingModal($bookingId)
     $items = Item::all(); // หรือเรียกใช้ข้อมูลอุปกรณ์ตามความเหมาะสม
     $group = Booking::find($id);  // ดึงข้อมูลการจองจากฐานข้อมูล
 
-    return view('bookindDetail', compact('booking', 'items','group'));
+    return view('bookingDetail', compact('booking', 'items','group'));
 }
 
 

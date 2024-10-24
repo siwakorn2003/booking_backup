@@ -232,7 +232,7 @@ class LendingController extends Controller
             }
         }
     
-        return redirect()->route('borrow.success')->with('success', 'Borrowing successful');
+        return redirect()->route('bookingDetail', ['id' => $bookingDetail->id]);
     }
     
     
