@@ -22,6 +22,12 @@ class UserController extends Controller
                   ->orWhere('phone', 'like', '%' . $search . '%');
             });
         }
+<<<<<<< HEAD
+=======
+
+    // คำนวณจำนวนผู้ใช้ทั้งหมด
+       
+>>>>>>> 22d03936b995cdf95ac200c3e34653a125707291
     
         // Paginate the results
         $users = $query->paginate(10); // ดึงผู้ใช้ 10 คนต่อหน้า
@@ -113,4 +119,9 @@ class UserController extends Controller
         $user->delete();
         return redirect()->route('users.index')->with('success', 'สมาชิกถูกลบเรียบร้อยแล้ว');
     }
+<<<<<<< HEAD
+=======
+
+    
+>>>>>>> 22d03936b995cdf95ac200c3e34653a125707291
 }

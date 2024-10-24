@@ -46,7 +46,11 @@ class LendingController extends Controller
     $bookingTime = '11:00'; // ตัวอย่างเวลา
     $stadiumId = 1; // ตัวอย่าง ID สนาม
 
+<<<<<<< HEAD
     return view('lending.borrow-equipment', compact('items', 'itemTypes', 'bookingDate', 'bookingTime', 'stadiumId'));
+=======
+    return view('lending.index', compact('items', 'itemTypes', 'bookingDate', 'bookingTime', 'stadiumId'));
+>>>>>>> 22d03936b995cdf95ac200c3e34653a125707291
 
 }
 
@@ -151,6 +155,7 @@ class LendingController extends Controller
 
 
     public function borrowItem(Request $request)
+<<<<<<< HEAD
     {
         // ตรวจสอบข้อมูลการยืม
         $request->validate([
@@ -217,23 +222,120 @@ class LendingController extends Controller
                 $totalPrice = $item->price * $borrowQuantity;
     
                 // บันทึกรายการยืมในตาราง borrow_detail
+=======
+{
+    // ตรวจสอบข้อมูลการยืม
+    $request->validate([
+        'stadium_id' => 'required|exists:stadium,id',
+        'booking_date' => 'required|date',
+        'item_id' => 'required|array',
+        'item_id.*' => 'exists:item,id',
+        'borrow_quantity' => 'required|array',
+        'borrow_quantity.*' => 'integer|min:0',
+        
+    ]);
+
+    // ดึงข้อมูลการจองจาก booking_stadium
+    $bookingStadium = BookingStadium::where('users_id', auth()->id())
+        ->first();
+
+    if (!$bookingStadium) {
+        return redirect()->back()->withErrors('การจองสนามไม่พบ');
+    }
+
+    // ดึงข้อมูลจาก booking_detail ที่เกี่ยวข้อง โดยตรวจสอบ booking_date
+    $bookingDetails = BookingDetail::where('booking_stadium_id', $bookingStadium->id)
+        ->where('booking_date', $request->booking_date)
+        ->get();
+
+    if ($bookingDetails->isEmpty()) {
+        return redirect()->back()->withErrors('การจองในวันและเวลานี้ไม่พบ');
+    }
+
+    // สร้างการบันทึกในตาราง borrow
+    $borrow = Borrow::create([
+        'borrow_date' => $request->booking_date,
+        'users_id' => auth()->id(),
+        'booking_stadium_id' => $bookingStadium->id,
+        'borrow_status' => 'รอการชำระเงิน',
+    ]);
+
+    // วนลูปสร้างรายการยืมสำหรับแต่ละ item
+    foreach ($request->item_id as $index => $itemId) {
+        $borrowQuantity = $request->borrow_quantity[$index];
+
+        // ข้ามการบันทึกถ้าจำนวนการยืมเป็น 0
+        if ($borrowQuantity == 0) {
+            continue;
+        }
+
+        // ตรวจสอบว่า item มีอยู่หรือไม่
+        $item = Item::find($itemId);
+        if (!$item) {
+            return redirect()->back()->withErrors("Item not found: $itemId.");
+        }
+
+        // วนลูปตาม bookingDetails เพื่อบันทึก time slots ทั้งหมดที่จองไว้
+        foreach ($bookingDetails as $bookingDetail) {
+            $timeSlotId = $bookingDetail->time_slot_id;
+            $timeSlot = TimeSlot::find($timeSlotId);
+
+            if (!$timeSlot) {
+                return redirect()->back()->withErrors('Time slot not found.');
+            }
+
+            // คำนวณราคายืมรวม
+            $totalPrice = $item->price * $borrowQuantity; // คำนวณราคาเพียงครั้งเดียว
+
+            // ตรวจสอบว่ามีการยืมรายการเดียวกันหรือไม่
+            $existingDetail = BorrowDetail::where('borrow_id', $borrow->id)
+                ->where('item_id', $itemId)
+                ->where('stadium_id', $bookingDetail->stadium_id)
+                ->where('borrow_date', $bookingDetail->booking_date)
+                ->where('time_slot_id', $timeSlotId)
+                ->first();
+
+            if ($existingDetail) {
+                // ถ้ามีรายการอยู่แล้ว เพิ่มจำนวนและราคา
+                $existingDetail->borrow_quantity += $borrowQuantity; // เพิ่มจำนวน
+                $existingDetail->borrow_total_price += $totalPrice; // เพิ่มราคา
+                // ไม่ต้องเปลี่ยน borrow_total_hour เพราะไม่ใช่การคำนวณที่นี่
+                $existingDetail->save();
+            } else {
+                // ถ้ายังไม่มีรายการใหม่ ให้บันทึก
+>>>>>>> 22d03936b995cdf95ac200c3e34653a125707291
                 BorrowDetail::create([
                     'stadium_id' => $bookingDetail->stadium_id,
                     'borrow_date' => $bookingDetail->booking_date,
                     'time_slot_id' => $timeSlotId,
                     'item_id' => $itemId,
                     'borrow_quantity' => $borrowQuantity,
+<<<<<<< HEAD
                     'borrow_total_price' => $totalPrice,
                     'borrow_total_hour' => $borrowTotalHour,
+=======
+                    'borrow_total_price' => $totalPrice, // บันทึกราคาเพียงครั้งเดียว
+                    'borrow_total_hour' => 0, // ไม่ต้องบันทึกเวลาการยืม
+>>>>>>> 22d03936b995cdf95ac200c3e34653a125707291
                     'item_item_type_id' => $item->item_type_id,
                     'borrow_id' => $borrow->id,
                     'users_id' => auth()->id(),
                 ]);
             }
         }
+<<<<<<< HEAD
     
         return redirect()->route('bookingDetail', ['id' => $bookingDetail->id]);
     }
+=======
+    }
+
+    return redirect()->back()->with('success', 'ยืมอุปกรณ์สำเร็จ');
+}
+
+
+
+>>>>>>> 22d03936b995cdf95ac200c3e34653a125707291
     
     
     
@@ -256,4 +358,8 @@ public function showBookingDetail($bookingId)
 
 }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 22d03936b995cdf95ac200c3e34653a125707291
 }
