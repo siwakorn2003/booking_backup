@@ -27,5 +27,24 @@ public function showPaymentForm($booking_stadium_id)
     // คุณอาจต้องการดึงข้อมูลการจองและส่งไปยังหน้าแจ้งชำระเงิน
     return view('paymentBooking', compact('booking_stadium_id'));
 }
+public function confirmPayment(Request $request)
+{
+    // ดำเนินการยืนยันการชำระเงินที่นี่
+
+    // ค้นหารายการจองและการยืม
+    $bookingStadium = BookingStadium::find($request->booking_stadium_id);
+    $borrowing = Borrow::where('booking_stadium_id', $request->booking_stadium_id)->first();
+
+    if ($bookingStadium && $borrowing) {
+        // อัปเดตสถานะการจองและการยืมเป็น 'รอการตรวจสอบ'
+        $bookingStadium->update(['booking_status' => 'รอการตรวจสอบ']);
+        $borrowing->update(['borrow_status' => 'รอการตรวจสอบ']);
+        
+        return redirect()->route('confirmationPage')->with('success', 'การชำระเงินของคุณได้รับการยืนยันเรียบร้อยแล้ว');
+    }
+
+    return redirect()->back()->with('error', 'ไม่สามารถยืนยันการชำระเงินได้');
+}
+
 
 }

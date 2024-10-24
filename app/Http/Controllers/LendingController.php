@@ -160,11 +160,12 @@ class LendingController extends Controller
         'item_id.*' => 'exists:item,id',
         'borrow_quantity' => 'required|array',
         'borrow_quantity.*' => 'integer|min:0',
-        
     ]);
 
-    // ดึงข้อมูลการจองจาก booking_stadium
+    // ดึงข้อมูลการจองจาก booking_stadium ล่าสุด
     $bookingStadium = BookingStadium::where('users_id', auth()->id())
+        ->where('booking_status', 'รอการชำระเงิน')
+        ->latest()
         ->first();
 
     if (!$bookingStadium) {
@@ -180,11 +181,11 @@ class LendingController extends Controller
         return redirect()->back()->withErrors('การจองในวันและเวลานี้ไม่พบ');
     }
 
-    // สร้างการบันทึกในตาราง borrow
+    // สร้างการบันทึกในตาราง borrow โดยใช้ ID การจองสนามล่าสุด
     $borrow = Borrow::create([
         'borrow_date' => $request->booking_date,
         'users_id' => auth()->id(),
-        'booking_stadium_id' => $bookingStadium->id,
+        'booking_stadium_id' => $bookingStadium->id, // ใช้ ID ปัจจุบัน
         'borrow_status' => 'รอการชำระเงิน',
     ]);
 
@@ -227,7 +228,6 @@ class LendingController extends Controller
                 // ถ้ามีรายการอยู่แล้ว เพิ่มจำนวนและราคา
                 $existingDetail->borrow_quantity += $borrowQuantity; // เพิ่มจำนวน
                 $existingDetail->borrow_total_price += $totalPrice; // เพิ่มราคา
-                // ไม่ต้องเปลี่ยน borrow_total_hour เพราะไม่ใช่การคำนวณที่นี่
                 $existingDetail->save();
             } else {
                 // ถ้ายังไม่มีรายการใหม่ ให้บันทึก
@@ -237,10 +237,10 @@ class LendingController extends Controller
                     'time_slot_id' => $timeSlotId,
                     'item_id' => $itemId,
                     'borrow_quantity' => $borrowQuantity,
-                    'borrow_total_price' => $totalPrice, // บันทึกราคาเพียงครั้งเดียว
-                    'borrow_total_hour' => 0, // ไม่ต้องบันทึกเวลาการยืม
+                    'borrow_total_price' => $totalPrice,
+                    'borrow_total_hour' => 0,
                     'item_item_type_id' => $item->item_type_id,
-                    'borrow_id' => $borrow->id,
+                    'borrow_id' => $borrow->id, // ใช้ ID ของการยืมล่าสุด
                     'users_id' => auth()->id(),
                 ]);
             }
@@ -252,14 +252,6 @@ class LendingController extends Controller
 
 
 
-    
-    
-    
-
-    
-    
-    
-    
     
 public function showBookingDetail($bookingId)
 {
@@ -273,6 +265,22 @@ public function showBookingDetail($bookingId)
 
 
 }
+
+public function destroyBorrow($id)
+{
+    // ค้นหาการยืมตาม ID
+    $borrow = Borrow::findOrFail($id);
+    
+    // ลบรายละเอียดการยืมที่เกี่ยวข้อง
+    $borrowDetails = BorrowDetail::where('borrow_id', $borrow->id);
+    $borrowDetails->delete();
+
+    // ลบการยืม
+    $borrow->delete();
+
+    return response()->json(['success' => 'ลบการยืมสำเร็จ']);
+}
+
 
 
 }
