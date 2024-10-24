@@ -1,86 +1,46 @@
- 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>แจ้งชำระเงิน</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body {
-      background-color: #f0f0f0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    .payment-form {
-      background-color: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      max-width: 400px;
-      width: 100%;
-    }
-    .form-title {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .form-text {
-      font-size: 12px;
-      color: red;
-      margin-top: 10px;
-    }
-  </style>
-</head>
-<body>
+<!-- resources/views/paymentNotification.blade.php -->
+@extends('layouts.app')
 
-  <div class="payment-form">
-    <h3 class="form-title">แจ้งชำระเงิน</h3>
-    
-    <form action="{{ route('processPayment') }}" method="POST" enctype="multipart/form-data">
-      @csrf
-      <div class="mb-3">
-        <label for="bookingCode" class="form-label">รหัสการจอง*</label>
-        <input type="text" class="form-control" id="bookingCode" name="booking_code" required>
-      </div>
-      
-      <div class="mb-3">
-        <label for="payerName" class="form-label">ชื่อผู้โอน*</label>
-        <input type="text" class="form-control" id="payerName" name="payer_name" required>
-      </div>
+@section('content')
+<div class="container col-3">
+    <h2 class="text-center mb-4">แจ้งการชำระเงิน</h2>
+    <form action="" method="POST" enctype="multipart/form-data" class="shadow-lg p-4 rounded">
+        @csrf
 
-      <div class="mb-3">
-        <label for="phoneNumber" class="form-label">เบอร์โทรศัพท์*</label>
-        <input type="tel" class="form-control" id="phoneNumber" name="phone_number" required>
-      </div>
+        <div class="form-group mb-3">
+            <label for="booking_code">รหัสการจอง*</label>
+            <input type="text" id="booking_code" name="booking_code" class="form-control" required>
+        </div>
 
-      <div class="mb-3">
-        <label for="paymentDateTime" class="form-label">วันที่และเวลาโอน*</label>
-        <input type="datetime-local" class="form-control" id="paymentDateTime" name="payment_date_time" required>
-      </div>
+        <div class="form-group mb-3">
+            <label for="payer_name">ชื่อผู้โอน*</label>
+            <input type="text" id="payer_name" name="payer_name" class="form-control" required>
+        </div>
 
-      <div class="mb-3">
-        <label for="amount" class="form-label">จำนวนเงินที่โอน*</label>
-        <input type="number" class="form-control" id="amount" name="amount" required>
-      </div>
+        <div class="form-group mb-3">
+            <label for="phone_number">เบอร์โทรศัพท์*</label>
+            <input type="tel" id="phone_number" name="phone_number" class="form-control" required>
+        </div>
 
-      <div class="mb-3">
-        <label for="slipUpload" class="form-label">โอนแล้วอัปโหลดสลิปได้ที่</label>
-        <input type="file" class="form-control" id="slipUpload" name="slip_upload" required>
-      </div>
+        <div class="form-group mb-3">
+            <label for="transfer_datetime">วันที่และเวลาโอน*</label>
+            <input type="datetime-local" id="transfer_datetime" name="transfer_datetime" class="form-control" required>
+        </div>
 
-      <p class="form-text">
-        เมื่อกดยืนยันแล้วไม่สามารถยกเลิกแก้ไขได้ โปรดตรวจสอบก่อนยืนยัน
-      </p>
+        <div class="form-group mb-3">
+            <label for="transfer_amount">จำนวนเงินที่โอน*</label>
+            <input type="number" id="transfer_amount" name="transfer_amount" class="form-control" required>
+        </div>
 
-      <div class="d-grid gap-2">
-        <button type="submit" class="btn btn-success">ยืนยันการชำระเงิน</button>
-        <button type="button" class="btn btn-secondary" onclick="window.history.back();">ยกเลิก</button>
-      </div>
+        <div class="form-group mb-3">
+            <label for="transfer_slip">โอนแล้วอัปโหลดสลิปได้ที่</label>
+            <input type="file" id="transfer_slip" name="transfer_slip" class="form-control" accept="image/*" required>
+        </div>
+
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary">ยืนยันการชำระเงิน</button>
+            <a href="{{ route('home') }}" class="btn btn-secondary">ยกเลิก</a>
+        </div>
     </form>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+</div>
+@endsection
