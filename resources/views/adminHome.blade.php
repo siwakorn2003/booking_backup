@@ -111,8 +111,4 @@
         text-decoration: none; /* ป้องกันเส้นใต้ */
     }
 </style>
-<<<<<<< HEAD
 @endsection
-=======
-@endsection
->>>>>>> 22d03936b995cdf95ac200c3e34653a125707291

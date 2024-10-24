@@ -3,13 +3,6 @@
 @section('content')
 <div class="container-fluid px-0">
     <!-- Hero Section -->
-<<<<<<< HEAD
-    <header class="hero" style="background: url('https://png.pngtree.com/thumb_back/fw800/background/20230906/pngtree-a-soccer-ball-next-to-a-soccer-field-image_13313617.jpg') no-repeat center center; background-size: cover; color: white; height: 400px; width: 100%; position: relative; overflow: hidden;">
-        <div class="hero-content" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; width: 100%; padding: 0 15px; background: rgba(0, 0, 0, 0.5); border-radius: 10px;">
-            <h1 class="display-4">ยินดีต้อนรับเข้าสู่เว็บจองสนามฟุตบอล</h1>
-            <p class="lead">สามารถจองได้เลยเวลานี้!</p>
-        </div>
-=======
     <header class="hero" style="background: url('https://th.bing.com/th/id/R.88b715f42f65ec255eeeb6a890286246?rik=3MK8Zc81oXE6Dw&riu=http%3a%2f%2fwallpapercave.com%2fwp%2fV0VMLUp.jpg&ehk=cSbpTcNpQCURyiEdPRYANWvn%2f7ke%2fiQ0Ji44QnI%2bY7Q%3d&risl=&pid=ImgRaw&r=0') no-repeat center center; background-size: cover; color: white; height: 400px; width: 100%; position: relative; overflow: hidden;">
         <div class="hero-content" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; width: 100%; padding: 0 15px; background: rgba(0, 0, 0, 0.5); border-radius: 10px;">
             <h1 class="display-4">ยินดีต้อนรับเข้าสู่เว็บจองสนามฟุตบอล</h1>
@@ -21,7 +14,6 @@
  
             </button>
             </div>
->>>>>>> 22d03936b995cdf95ac200c3e34653a125707291
     </header>
 
     <!-- Success Message -->
@@ -31,9 +23,6 @@
         </div>
     @endif
 
-<<<<<<< HEAD
-    <!-- Rules Section -->
-=======
    <!-- Image Grid Section -->
 <!-- Image Grid Section -->
 <div class="container mt-5">
@@ -67,36 +56,23 @@
 </div>
 
    <!-- Rules Section -->
->>>>>>> 22d03936b995cdf95ac200c3e34653a125707291
     <div class="container mt-5">
         <h2 class="text-center mb-4">ระเบียบและข้อปฏิบัติการใช้สนามฟุตบอล</h2>
 
         <div class="rules-section bg-light p-4 rounded shadow">
-<<<<<<< HEAD
-            <h4>การจองสนาม</h4>
-            <ul class="pl-3">
-=======
             <h4 class="text-primary">การจองสนาม</h4>
             <ul class="pl-3" style="list-style-type: disc;">
->>>>>>> 22d03936b995cdf95ac200c3e34653a125707291
                 <li>ลูกค้าแจ้งเจ้าหน้าที่ทุกครั้งก่อนเข้าใช้สนาม</li>
                 <li>ลูกค้าที่จองสนาม ต้องมาถึงสนามก่อน 10 นาที</li>
                 <li>หากมาช้ากว่าเวลากำหนด ถือว่าสละสิทธิการจองครั้งนั้น</li>
                 <li>ในกรณีต้องการยกเลิกการจอง กรุณาโทรแจ้งก่อนล่วงหน้าอย่างน้อย 1 วัน</li>
             </ul>
-<<<<<<< HEAD
-
-            <h4>การใช้สนาม</h4>
-            <ul class="pl-3">
-                <li>กรุณารักษาเวลาการจองใช้สนาม</li>
-=======
         </div>
 
         <div class="rules-section bg-light p-4 rounded shadow mt-4">
             <h4 class="text-primary">การใช้สนาม</h4>
             <ul class="pl-3" style="list-style-type: disc;">
                 <li>กรุณารักษาเวลาการจองสนามและใช้สนาม</li>
->>>>>>> 22d03936b995cdf95ac200c3e34653a125707291
                 <li>กรุณาสวมเครื่องแต่งกายชุดกีฬา และสวมรองเท้ากีฬาเท่านั้น</li>
                 <li>ไม่อนุญาตให้นำสัตว์เลี้ยงเข้าภายในสนามและบริเวณคลับเฮาส์</li>
                 <li>ห้ามสูบบุหรี่ภายในสนามโดยเด็ดขาด สูบบุหรี่ในสนามปรับ 2,000 บาท สามารถสูบบุหรี่ในบริเวณที่จัดไว้ให้เท่านั้น</li>
@@ -111,31 +87,6 @@
                 <li>หากพื้นสนาม, สถานที่ และอุปกรณ์ เกิดความเสียหาย ผู้ใช้บริการจะต้องชำระค่าเสียหายตามมูลค่าจริงที่เกิดขึ้น</li>
             </ul>
         </div>
-<<<<<<< HEAD
-    </div>
-</div>
-
-<script>
-    // รอให้เนื้อหาในหน้าเว็บทั้งหมดโหลดเสร็จสมบูรณ์ก่อนทำงาน
-    document.addEventListener('DOMContentLoaded', function() {
-        
-        // ค้นหาองค์ประกอบที่มี id เป็น 'success-message' (ข้อความแจ้งเตือนความสำเร็จ)
-        var successMessage = document.getElementById('success-message');
-        
-        // ตรวจสอบว่าพบข้อความแจ้งเตือนหรือไม่ (ถ้าพบจะทำงานต่อ)
-        if (successMessage) {
-            
-            // ตั้งเวลาให้ข้อความแจ้งเตือนแสดงเป็นเวลา 5 วินาที (5000 มิลลิวินาที)
-            setTimeout(function() {
-                
-                // ซ่อนข้อความแจ้งเตือนโดยการเปลี่ยนค่า display เป็น 'none'
-                successMessage.style.display = 'none';
-            }, 5000); // ระยะเวลาคือ 5000 มิลลิวินาที หรือ 5 วินาที
-        }
-    });
-</script>
-
-=======
 
         <div class="rules-section bg-light p-4 rounded shadow mt-4">
             <h4 class="text-primary">การยืมอุปกรณ์</h4>
@@ -228,5 +179,4 @@
    
 
 </style>
->>>>>>> 22d03936b995cdf95ac200c3e34653a125707291
 @endsection

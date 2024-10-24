@@ -26,42 +26,6 @@
     <link rel="stylesheet" href="{{ asset('css/login.css') }}">
 
     <style>
-<<<<<<< HEAD
-        /* ส่วนของ navbar */
-        .navbar-top {
-            background-color: #279a3e;
-            padding: 10px 0;
-        }
-
-        .navbar-bottom {
-            background-color: #ffffff;
-            padding: 20px 0; /* เพิ่ม padding เพื่อเพิ่มความสูง */
-            font-size: 15px; /* เพิ่มขนาดตัวอักษร */
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-       
-        }
-
-        /* กำหนดสีให้ลิงก์ใน navbar-bottom */
-        .navbar-bottom a {
-            color: #4261c5;
-            margin: 0 20px;
-            text-transform: uppercase;
-           
-        }
-
-        
-    
-
-        .navbar-bottom a:hover {
-            color: #304998;
-        }
-
-        .navbar-brand img {
-            width: 40px;
-            height: 40px;
-            margin-right: 8px;
-        }
-=======
 
 /* สไตล์สำหรับปุ่มเข้าสู่ระบบและสมัครสมาชิก */
 .navbar-nav .nav-link {
@@ -160,7 +124,6 @@
     }
 
 
->>>>>>> 22d03936b995cdf95ac200c3e34653a125707291
     </style>
 
     <!-- Scripts -->
@@ -173,15 +136,9 @@
         <nav class="navbar-top">
             <div class="container d-flex justify-content-between align-items-center">
                 <!-- Brand and Home link -->
-<<<<<<< HEAD
-                <a class="navbar-brand d-flex align-items-center " href="{{ route('admin.home') }}">
-                    <img  src="https://www.svgrepo.com/show/163314/football.svg" alt="Football Icon">
-                    ฟุตบอลคลับ
-=======
                 <a class="navbar-brand d-flex align-items-center" href="{{ route('admin.home') }}">
                     <img src="https://www.svgrepo.com/show/163314/football.svg" alt="Football Icon">
                     <span>ฟุตบอลคลับ</span>
->>>>>>> 22d03936b995cdf95ac200c3e34653a125707291
                 </a>
 
                 <!-- Authentication Links -->
@@ -189,11 +146,7 @@
                     @guest
                         @if (Route::has('login'))
                             <li class="nav-item">
-<<<<<<< HEAD
-                                <a class="nav-link text-white" href="{{ route('login') }}">
-=======
                                 <a class="nav-link" href="{{ route('login') }}">
->>>>>>> 22d03936b995cdf95ac200c3e34653a125707291
                                     <i class="fas fa-sign-in-alt me-1"></i> {{ __('เข้าสู่ระบบ') }}
                                 </a>
                             </li>
@@ -201,11 +154,7 @@
 
                         @if (Route::has('register'))
                             <li class="nav-item">
-<<<<<<< HEAD
-                                <a class="nav-link text-white" href="{{ route('register') }}">
-=======
                                 <a class="nav-link" href="{{ route('register') }}">
->>>>>>> 22d03936b995cdf95ac200c3e34653a125707291
                                     <i class="fas fa-user-plus me-1"></i> {{ __('สมัครสมาชิก') }}
                                 </a>
                             </li>
@@ -238,23 +187,10 @@
         <nav class="navbar-bottom">
             <div class="container d-flex justify-content-start">
                 <a href="{{ route('booking') }}">
-<<<<<<< HEAD
-                    <i class="fas fa-calendar-alt me-1"></i> {{ __('จองสนาม') }}
-                </a>
-                <a href="{{ route('booking.detail', ['id' => $booking_stadium_id ?? 'null']) }}">
-                    <i class="fas fa-calendar-alt me-1"></i> {{ __('รายละเอียดการจองสนาม') }}
-                </a>
-                <a href="{{ route('lending.index') }}">
-                    <i class="fas fa-basketball-ball me-1"></i> {{ __('ยืมอุปกรณ์') }}
-                </a>
-                <a href="{{ route('lending.borrow-detail') }}">
-                    <i class="fas fa-basketball-ball me-1"></i> {{ __('รายละเอียดการยืมอุปกรณ์') }}
-=======
                     <i class="fas fa-calendar-alt"></i> {{ __('จองสนาม') }}
                 </a>
                 <a href="{{ route('booking.detail', ['id' => $booking_stadium_id ?? 'null']) }}">
                     <i class="fas fa-info-circle"></i> {{ __('รายละเอียดการจองสนาม') }}
->>>>>>> 22d03936b995cdf95ac200c3e34653a125707291
                 </a>
             </div>
         </nav>
@@ -269,11 +205,7 @@
     @stack('scripts')
 
     <!-- Bootstrap JS -->
-<<<<<<< HEAD
-    {{-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> --}}
-=======
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
->>>>>>> 22d03936b995cdf95ac200c3e34653a125707291
 </body>
 
 </html>

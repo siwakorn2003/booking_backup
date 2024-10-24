@@ -38,8 +38,4 @@ class HomeController extends Controller
         $stadiumCount = Stadium::count(); // นับจำนวนสนามทั้งหมด
         return view('adminHome', compact('userCount', 'stadiumCount')); // ส่งตัวแปร userCount และ stadiumCount ไปยัง view
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 22d03936b995cdf95ac200c3e34653a125707291

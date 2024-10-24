@@ -15,11 +15,7 @@
             <div class="d-flex justify-content-between align-items-center">
                 <h1>รายละเอียดการจอง</h1>
                 @if (isset($groupedBookingDetails) && $groupedBookingDetails->isNotEmpty())
-<<<<<<< HEAD
-                    <span class="badge bg-info">{{ $groupedBookingDetails->first()['booking_status'] }}</span>
-=======
                     <span style="padding:10px; font-size:15px;" class="badge bg-info">{{ $groupedBookingDetails->first()['booking_status'] }}</span>
->>>>>>> 22d03936b995cdf95ac200c3e34653a125707291
                 @endif
             </div>
 
@@ -55,10 +51,7 @@
                             <th>เวลา</th>
                             <th>ราคา</th>
                             <th>ชั่วโมง</th>
-<<<<<<< HEAD
-=======
                             <th>ยืมอุปกรณ์</th>
->>>>>>> 22d03936b995cdf95ac200c3e34653a125707291
                             <th>ลบ</th>
                         </tr>
                     </thead>
@@ -81,11 +74,8 @@
                                     ยืมอุปกรณ์
                                 </button>
                             </td>
-<<<<<<< HEAD
-=======
                             <td>
                             </td>
->>>>>>> 22d03936b995cdf95ac200c3e34653a125707291
                             
                             
                             
@@ -100,57 +90,6 @@
             @endif
 
             <!-- แสดงรายละเอียดการยืมด้านล่าง -->
-<<<<<<< HEAD
-            @if ($borrowingDetails->Empty())
-                <h2 class="mt-5">รายละเอียดการยืมอุปกรณ์</h2>
-                <table class="table table-bordered table-striped">
-                    <thead class="table-light">
-                        <tr>
-                            <th>รหัสการยืม</th>
-
-                            <th>ชื่ออุปกรณ์</th>
-                            <th>สนามที่ใช้</th>
-                            <th>วันที่ยืม</th>
-                            <th>เวลา</th>
-                            <th>จำนวน</th>
-                            <th>ราคา</th>
-                            
-                            <th>ลบ</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($borrowingDetails as $borrow)
-                            @foreach ($borrow->details as $detail)
-                                <!-- วนลูปเพื่อแสดงรายละเอียด -->
-                                <tr id="borrow-row-{{ $borrow->id }}">
-                                    <td>{{ $borrow->id }}</td>
-                                   
-                                    <td>{{ $detail->item->item_name }}</td>
-                                    <td>{{ $detail->stadium->stadium_name }}</td>
-                                    <td>{{ $borrow->borrow_date }}</td>
-                                    <td>
-                                        @if ($detail->timeSlot)
-                                            <!-- ตรวจสอบว่ามีข้อมูลเวลา -->
-                                            {{ $detail->timeSlot->time_slot }} <!-- แสดงช่วงเวลาจาก time slot -->
-                                        @else
-                                            ไม่มีข้อมูลเวลา
-                                        @endif
-                                    </td>
-                                    <td>{{ $detail->borrow_quantity }}</td>
-                                    <td>{{ number_format($detail->borrow_total_price) }} บาท</td>
-                                    
-                                    <td>
-                                        <button class="btn btn-outline-danger delete-borrow"
-                                            data-id="{{ $borrow->id }}">ลบ</button>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        @endforeach
-                    </tbody>
-                </table>
-           
-            @endif
-=======
 @if ($borrowingDetails->isNotEmpty())
 <h2 class="mt-5">รายละเอียดการยืมอุปกรณ์</h2>
 <table class="table table-bordered table-striped">
@@ -214,7 +153,6 @@
 
 
         
->>>>>>> 22d03936b995cdf95ac200c3e34653a125707291
 
           
 

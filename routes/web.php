@@ -16,10 +16,7 @@ use App\Http\Controllers\BorrowingController;
 use App\Http\Controllers\StadiumController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\LendingController;
-<<<<<<< HEAD
-=======
 use App\Http\Controllers\PaymentController;
->>>>>>> 22d03936b995cdf95ac200c3e34653a125707291
 
 // เส้นทางหลัก
 Route::get('/', function () {
@@ -103,13 +100,6 @@ Route::get('/lending/borrow-detail', [LendingController::class, 'borrowDetail'])
 Route::delete('/lending/borrow/{id}', [LendingController::class, 'destroyBorrow'])->name('lending.destroyBorrow');
 
 
-<<<<<<< HEAD
-// Route::get('/bookingDetail/{id}', [BookingController::class, 'show'])->name('booking.detail');
-Route::delete('/booking/{id}', [BookingController::class, 'destroy'])->name('booking.destroy');
-
-Route::get('/bookingDetail/{id}', [BookingController::class, 'show'])->name('booking.detail');
-Route::post('/confirmBooking/{booking_stadium_id}', [BookingController::class, 'confirmBooking'])->name('confirmBooking');
-=======
 
 
 Route::get('/bookingDetail/{id}', [BookingController::class, 'show'])->name('booking.detail');
@@ -118,4 +108,3 @@ Route::post('/confirmBooking/{booking_stadium_id}', [BookingController::class, '
 
 Route::get('/payment-booking/{booking_stadium_id}', [PaymentController::class, 'showPaymentForm'])->name('paymentBooking');
 Route::post('/process-payment', [PaymentController::class, 'processPayment'])->name('processPayment');
->>>>>>> 22d03936b995cdf95ac200c3e34653a125707291
