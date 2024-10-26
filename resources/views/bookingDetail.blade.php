@@ -36,7 +36,7 @@
                 </div>
             @endif
 
-            <!-- ถ้ามีข้อความแจ้งเตือน ไม่มีข้อมูลการจอง -->
+            <!-- ถ้าไม่มีข้อมูลการจอง ให้ข้อความแจ้งเตือน -->
             @if (isset($message))
                 <div class="alert alert-info">
                     {{ $message }}
@@ -56,37 +56,31 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($groupedBookingDetails as $group)
-                        <tr>
-                            <td>{{ $group['stadium_name'] }}</td>
-                            <td>{{ $group['booking_date'] }}</td>
-                            <td>{{ $group['time_slots'] }}</td>
-                            <td>{{ number_format($group['total_price']) }} บาท</td>
-                            <td>{{ $group['total_hours'] }}</td>
-                            <td>
-                                <button class="btn btn-primary"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#lendingModal"
-                                    data-stadium-name="{{ $group['stadium_name'] }}"
-                                    data-booking-date="{{ $group['booking_date'] }}"
-                                    data-time-slots="{{ $group['time_slots'] }}"
-                                    data-stadium-id="{{ $group['stadium_id'] }}"> <!-- เพิ่ม data-stadium-id -->
-                                    ยืมอุปกรณ์
-                                </button>
-                            </td>
-                            <td>
-                            </td>
-                            
-                            
-                            
-                            
-                        </tr>
-                    @endforeach
-                    
-                    </tbody>
+                        @foreach ($groupedBookingDetails as $detail)
+    <tr id="booking-detail-row-{{ $detail['id'] }}">
+        <td>{{ $detail['stadium_name'] }}</td>
+        <td>{{ $detail['booking_date'] }}</td>
+        <td>{{ $detail['time_slots'] }}</td>
+        <td>{{ number_format($detail['total_price']) }} บาท</td>
+        <td>{{ $detail['total_hours'] }}</td>
+        <td>
+            <button class="btn btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#lendingModal"
+                data-stadium-name="{{ $detail['stadium_name'] }}"
+                data-booking-date="{{ $detail['booking_date'] }}"
+                data-time-slots="{{ $detail['time_slots'] }}"
+                data-stadium-id="{{ $detail['stadium_id'] }}">ยืมอุปกรณ์</button>
+        </td>
+        <td>
+            <button class="btn btn-outline-danger delete-booking-detail" data-id="{{ $detail['id'] }}">ลบ</button>
+        </td>
+    </tr>
+@endforeach
+
+</tbody>
                 </table>
-            @else
-                <p>ไม่พบข้อมูลการจอง</p>
+           
             @endif
 
             <!-- แสดงรายละเอียดการยืมด้านล่าง -->
@@ -98,8 +92,6 @@
             <th>สนามที่ใช้</th>
             <th>วันที่ยืม</th>
             <th>ชื่ออุปกรณ์</th>
-            
-          
             <th>เวลา</th>
             <th>ชั่วโมง</th>
             <th>จำนวน</th>
@@ -155,13 +147,7 @@
 </table>
 @endif
 
-
-        
-
-          
-
-
-            <div class="d-flex justify-content-between mt-4">
+    <div class="d-flex justify-content-between mt-4">
                 <button class="btn btn-outline-secondary"
                     onclick="window.location='{{ route('booking') }}'">ย้อนกลับ</button>
                 <div>
@@ -184,29 +170,38 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
-            // เมื่อคลิกปุ่มลบการจอง
-            $('.delete-booking').on('click', function(e) {
-                e.preventDefault();
-                var bookingId = $(this).data('id');
-                var row = $('#booking-row-' + bookingId);
+        // เมื่อคลิกปุ่มลบการจอง
+        $(document).ready(function() {
+        $('.delete-booking-detail').on('click', function(e) {
+            e.preventDefault();
+            var bookingDetailId = $(this).data('id');
+            var row = $('#booking-detail-row-' + bookingDetailId);
 
-                if (confirm('คุณแน่ใจที่จะลบรายการนี้?')) {
-                    $.ajax({
-                        url: '/booking/' + bookingId,
-                        type: 'DELETE',
-                        data: {
-                            _token: '{{ csrf_token() }}'
-                        },
-                        success: function(response) {
+            if (confirm('คุณแน่ใจที่จะลบรายการนี้?')) {
+                $.ajax({
+                    url: '/booking-detail/' + bookingDetailId,
+                    type: 'DELETE',
+                    data: {
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        if (response.success) {
                             row.remove();
-                            alert('ลบรายการจองสำเร็จ');
-                        },
-                        error: function(xhr) {
-                            alert('เกิดข้อผิดพลาดในการลบข้อมูล');
+                            alert(response.message);
+                        } else {
+                            alert('เกิดข้อผิดพลาด: ' + response.message);
                         }
-                    });
-                }
-            });
+                    },
+                    error: function(xhr) {
+                        alert('เกิดข้อผิดพลาดในการลบข้อมูล');
+                    }
+                });
+            }
+        });
+    });
+
+
+
 
             // เมื่อคลิกปุ่มลบการยืม
             $('.delete-borrow').on('click', function(e) {

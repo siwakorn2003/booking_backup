@@ -150,7 +150,7 @@ class LendingController extends Controller
     }
 
 
-    public function borrowItem(Request $request)
+   public function borrowItem(Request $request)
 {
     // Validate the borrowing data
     $request->validate([
@@ -172,13 +172,8 @@ class LendingController extends Controller
         return redirect()->back()->withErrors('การจองสนามไม่พบ');
     }
 
-    // Check if there's an existing borrow linked to the booking stadium
-    $existingBorrow = Borrow::where('users_id', auth()->id())
-        ->where('booking_stadium_id', $bookingStadium->id)
-        ->first();
-
-    // If no borrow exists, create a new one
-    $borrow = $existingBorrow ?: Borrow::create([
+    // Create a new borrow entry for the selected stadium and booking date
+    $borrow = Borrow::create([
         'borrow_date' => $request->booking_date,
         'users_id' => auth()->id(),
         'booking_stadium_id' => $bookingStadium->id,
@@ -190,7 +185,7 @@ class LendingController extends Controller
         ->where('booking_date', $request->booking_date)
         ->get();
 
-    // Loop through each item to create borrow details
+    // Loop through each item to create or update borrow details
     foreach ($request->item_id as $index => $itemId) {
         $borrowQuantity = $request->borrow_quantity[$index];
 
@@ -207,17 +202,17 @@ class LendingController extends Controller
 
         // Loop through booking details to save time slots
         foreach ($bookingDetails as $bookingDetail) {
-            if ($bookingDetail->stadium_id == $request->stadium_id) { // Ensure it's the selected stadium
+            // Ensure it's the selected stadium
+            if ($bookingDetail->stadium_id == $request->stadium_id) { 
                 $timeSlotId = $bookingDetail->time_slot_id;
 
                 // Calculate the total borrowing price
                 $totalPrice = $item->price * $borrowQuantity;
 
-                // Check if the item has already been borrowed
+                // Check if the item is of the same type and already borrowed
                 $existingDetail = BorrowDetail::where('borrow_id', $borrow->id)
                     ->where('item_id', $itemId)
                     ->where('stadium_id', $bookingDetail->stadium_id)
-                    ->where('borrow_date', $bookingDetail->booking_date)
                     ->where('time_slot_id', $timeSlotId)
                     ->first();
 
@@ -230,7 +225,7 @@ class LendingController extends Controller
                     // If it doesn't exist, create a new borrow detail
                     BorrowDetail::create([
                         'stadium_id' => $bookingDetail->stadium_id,
-                        'borrow_date' => $bookingDetail->booking_date,
+                        'borrow_date' => $request->booking_date, // Use the correct date
                         'time_slot_id' => $timeSlotId,
                         'item_id' => $itemId,
                         'borrow_quantity' => $borrowQuantity,
@@ -247,8 +242,6 @@ class LendingController extends Controller
 
     return redirect()->back()->with('success', 'ยืมอุปกรณ์สำเร็จ');
 }
-    
-
 
 
     
@@ -258,10 +251,9 @@ public function showBookingDetail($id)
     $bookingDetail = Booking::find($id);
      // ค้นหาข้อมูลการยืมอุปกรณ์ที่เกี่ยวข้อง
     $borrowingDetails = Borrow::where('booking_id', $id)->get();
-     
+
     return view('bookingDetail', compact('bookingDetail', 'borrowingDetails'));
 }
-
 
 public function destroyBorrow($id)
 {
