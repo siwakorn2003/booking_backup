@@ -19,6 +19,7 @@ class BookingDetail extends Model
         'booking_date', 
         'users_id',
         'time_slot_id',
+        
         // คอลัมน์ time_slot_stadium_id อาจจะไม่จำเป็น ถ้าไม่ใช้ในการเชื่อมโยง
     ];
 
@@ -46,4 +47,16 @@ class BookingDetail extends Model
     {
         return $this->belongsTo(TimeSlot::class, 'time_slot_id'); // ใช้เพียง time_slot_id
     }
+
+    // ความสัมพันธ์กับตาราง Borrow
+   // ในโมเดล BookingDetail
+public function borrow()
+{
+    return $this->hasOne(Borrow::class, 'booking_detail_id'); // ปรับให้ตรงกับคอลัมน์ที่เชื่อมโยงจริง
+}
+
+
+
+
+
 }

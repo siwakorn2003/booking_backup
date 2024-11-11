@@ -36,18 +36,15 @@
             <!-- Right Column: Payment Form -->
             <div class="col-md-6">
                 <h2 class="text-center mb-4">แจ้งการชำระเงิน</h2>
+                
                 <form action="{{ route('processPayment') }}" method="POST" enctype="multipart/form-data" class="shadow-lg p-4 rounded">
                     @csrf
 
                     <div class="form-group mb-3">
                         <label for="booking_code">รหัสการจอง*</label>
-                        <select id="booking_code" name="booking_code" class="form-control" required>
-                            <option value="" disabled selected>กรุณาเลือกรหัสการจอง</option>
-                            @foreach($bookings as $booking)
-                                <option value="{{ $booking->id }}">{{ $booking->id }} ({{ $booking->booking_status }})</option>
-                            @endforeach
-                        </select>
+                        <input type="text" id="booking_code" name="booking_code" class="form-control" value="{{ $booking->id }}" readonly>
                     </div>
+                    
 
                     <div class="form-group mb-3">
                         <label for="payer_name">ชื่อผู้โอน*</label>
@@ -57,8 +54,13 @@
                     <div class="form-group mb-3">
                         <label for="phone_number">เบอร์โทรศัพท์*</label>
                         <input type="tel" id="phone_number" name="phone_number" class="form-control" required>
+                        @error('phone_number')
+                        <div class="text-danger">{{ $message }}</div>
+                    @enderror
                     </div>
 
+                    <!-- แสดงข้อความผิดพลาดสำหรับ phone_number -->
+    
                     <div class="form-group mb-3">
                         <label for="select_bank">ธนาคารที่โอน*</label>
                         <select id="select_bank" name="select_bank" class="form-control" required>
@@ -83,7 +85,12 @@
                     <div class="form-group mb-3">
                         <label for="transfer_slip">อัปโหลดสลิปการโอนเงิน*</label>
                         <input type="file" id="transfer_slip" name="transfer_slip" class="form-control" accept="image/*" required>
+                        <div id="image-preview-container" class="mt-2" style="display: none;">
+                            
+                            <img id="image-preview" src="" alt="สลิปการโอนเงิน" class="img-fluid mt-2">
+                        </div>
                     </div>
+                    
 
                     <div class="text-center">
                         <button type="submit" class="btn btn-primary">ยืนยันการชำระเงิน</button>
@@ -94,4 +101,85 @@
         </div>
     </div>
 </div>
+
+<script>
+
+document.getElementById('transfer_slip').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    const previewContainer = document.getElementById('image-preview-container');
+    const previewImage = document.getElementById('image-preview');
+    
+    if (file) {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            previewImage.src = e.target.result; // ตั้งค่า src ของรูปภาพที่ได้จากการอ่านไฟล์
+            previewContainer.style.display = 'block'; // แสดงตัวอย่างรูปภาพ
+        };
+        
+        reader.readAsDataURL(file); // อ่านไฟล์ที่เลือกเป็น data URL
+    } else {
+        previewContainer.style.display = 'none'; // ซ่อนตัวอย่างรูปภาพหากไม่มีไฟล์
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    let timeLeft = 100; // ตั้งเวลา 20 วินาที
+    const countdownElement = document.createElement('div');
+    countdownElement.className = 'alert alert-warning text-center';
+    countdownElement.innerHTML = `เหลือเวลาในการชำระเงิน: ${timeLeft} วินาที`;
+    document.querySelector('.container').prepend(countdownElement);
+
+    const countdownTimer = setInterval(() => {
+        timeLeft--;
+        countdownElement.innerHTML = `เหลือเวลาในการชำระเงิน: ${timeLeft} วินาที`;
+
+        if (timeLeft <= 0) {
+            clearInterval(countdownTimer);
+            expirePayment();
+        }
+    }, 1000);
+
+    function expirePayment() {
+    const bookingCode = document.getElementById('booking_code').value;
+
+    if (!bookingCode) {
+        alert("กรุณาทำรายการจองก่อน");
+        return;
+    }
+
+    fetch("{{ route('expire.payment') }}", {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ booking_code: bookingCode })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert('การชำระเงินของคุณหมดเวลา โปรดทำรายการใหม่');
+            window.location.href = "{{ route('home') }}"; // กลับไปหน้าแรก
+        } else {
+            alert(data.message || 'เกิดข้อผิดพลาดในการตรวจสอบสถานะการชำระเงิน');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('เกิดข้อผิดพลาดในการตรวจสอบสถานะการชำระเงิน'); 
+    });
+}
+
+
+
+
+
+});
+
+</script>
+
+
+</script>
+
 @endsection

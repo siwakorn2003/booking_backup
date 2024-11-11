@@ -36,55 +36,15 @@ class Borrow extends Model
     {
         return $this->hasMany(BorrowDetail::class, 'borrow_id'); 
     }
+
+    public function bookingStadium()
+    {
+        return $this->belongsTo(BookingStadium::class, 'booking_stadium_id', 'id');
+    }
+    
+
+
+
 }
 
-class BorrowDetail extends Model
-{
-    use HasFactory;
-    public $timestamps = false; // ไม่มี timestamp ในฐานข้อมูล
 
-    protected $table = 'borrow_detail';
-    protected $guarded = [];
-    protected $fillable = [
-        'item_id',
-        'item_item_type_id',
-        'borrow_id',
-        'borrow_date',
-        'borrow_quantity',
-        'borrow_total_hour',
-        'borrow_total_price',
-        'users_id',
-        'time_slot_id',
-        'stadium_id',
-    ];
-
-    // สัมพันธ์กับตาราง Item
-    public function item()
-    {
-        return $this->belongsTo(Item::class);
-    }
-
-    // สัมพันธ์กับตาราง Borrow
-    public function borrow()
-    {
-        return $this->belongsTo(Borrow::class, 'borrow_id');
-    }
-
-    // สัมพันธ์กับตาราง TimeSlot
-    public function timeSlot()
-    {
-        return $this->belongsTo(TimeSlot::class, 'time_slot_id');
-    }
-
-    // สัมพันธ์กับตาราง Stadium
-    public function stadium()
-    {
-        return $this->belongsTo(Stadium::class, 'stadium_id');
-    }
-
-    // สัมพันธ์กับตาราง Users
-    public function user()
-    {
-        return $this->belongsTo(User::class, 'users_id');
-    }
-}

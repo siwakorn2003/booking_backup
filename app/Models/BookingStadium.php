@@ -30,7 +30,7 @@ class BookingStadium extends Model
 
 public function payment()
 {
-    return $this->hasOne(PaymentBooking::class, 'booking_stadium_id');
+    return $this->hasOne(PaymentBooking::class, 'booking_stadium_id', 'id');
 }
 
 public function borrow()
@@ -46,6 +46,10 @@ public function stadium() {
     return $this->belongsTo(Stadium::class, 'stadium_id'); // หรือใช้ชื่อฟิลด์ที่ถูกต้อง
 }
 
+public function timeSlots()
+{
+    return $this->hasMany(TimeSlot::class, 'stadium_id', 'stadium_id'); // Adjust based on your actual foreign key
+}
 
 
 }

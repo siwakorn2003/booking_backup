@@ -148,107 +148,119 @@ class LendingController extends Controller
         $item->delete();
         return redirect()->route('lending.index')->with('success', 'ลบอุปกรณ์สำเร็จ!');
     }
-
-
-   public function borrowItem(Request $request)
-{
-    // Validate the borrowing data
-    $request->validate([
-        'stadium_id' => 'required|exists:stadium,id',
-        'booking_date' => 'required|date',
-        'item_id' => 'required|array',
-        'item_id.*' => 'exists:item,id',
-        'borrow_quantity' => 'required|array',
-        'borrow_quantity.*' => 'integer|min:0',
-    ]);
-
-    // Retrieve the latest booking stadium for the user
-    $bookingStadium = BookingStadium::where('users_id', auth()->id())
-        ->where('booking_status', 'รอการชำระเงิน')
-        ->latest()
-        ->first();
-
-    if (!$bookingStadium) {
-        return redirect()->back()->withErrors('การจองสนามไม่พบ');
-    }
-
-    // Create a new borrow entry for the selected stadium and booking date
-    $borrow = Borrow::create([
-        'borrow_date' => $request->booking_date,
-        'users_id' => auth()->id(),
-        'booking_stadium_id' => $bookingStadium->id,
-        'borrow_status' => 'รอการชำระเงิน',
-    ]);
-
-    // Retrieve booking details for the specified date
-    $bookingDetails = BookingDetail::where('booking_stadium_id', $bookingStadium->id)
-        ->where('booking_date', $request->booking_date)
-        ->get();
-
-    // Loop through each item to create or update borrow details
-    foreach ($request->item_id as $index => $itemId) {
-        $borrowQuantity = $request->borrow_quantity[$index];
-
-        // Skip if the borrow quantity is 0
-        if ($borrowQuantity == 0) {
-            continue;
-        }
-
-        // Check if the item exists
-        $item = Item::find($itemId);
-        if (!$item) {
-            return redirect()->back()->withErrors("Item not found: $itemId.");
-        }
-
-        // Loop through booking details to save time slots
-        foreach ($bookingDetails as $bookingDetail) {
-            // Ensure it's the selected stadium
-            if ($bookingDetail->stadium_id == $request->stadium_id) { 
-                $timeSlotId = $bookingDetail->time_slot_id;
-
-                // Calculate the total borrowing price
-                $totalPrice = $item->price * $borrowQuantity;
-
-                // Check if the item is of the same type and already borrowed
-                $existingDetail = BorrowDetail::where('borrow_id', $borrow->id)
-                    ->where('item_id', $itemId)
-                    ->where('stadium_id', $bookingDetail->stadium_id)
-                    ->where('time_slot_id', $timeSlotId)
-                    ->first();
-
-                if ($existingDetail) {
-                    // If it exists, update the quantity and total price
-                    $existingDetail->borrow_quantity += $borrowQuantity;
-                    $existingDetail->borrow_total_price += $totalPrice;
-                    $existingDetail->save();
-                } else {
-                    // If it doesn't exist, create a new borrow detail
-                    BorrowDetail::create([
-                        'stadium_id' => $bookingDetail->stadium_id,
-                        'borrow_date' => $request->booking_date, // Use the correct date
-                        'time_slot_id' => $timeSlotId,
-                        'item_id' => $itemId,
-                        'borrow_quantity' => $borrowQuantity,
-                        'borrow_total_price' => $totalPrice,
-                        'borrow_total_hour' => 0,
-                        'item_item_type_id' => $item->item_type_id,
-                        'borrow_id' => $borrow->id,
-                        'users_id' => auth()->id(),
-                    ]);
+    public function borrowItem(Request $request)
+    {
+        $request->validate([
+            'stadium_id' => 'required|exists:stadium,id',
+            'booking_date' => 'required|date',
+            'item_id' => 'required|array',
+            'item_id.*' => 'exists:item,id',
+            'borrow_quantity' => 'required|array',
+            'borrow_quantity.*' => 'integer|min:0',
+        ]);
+    
+        $bookingStadium = BookingStadium::where('users_id', auth()->id())
+            ->where('booking_status', 'รอการชำระเงิน')
+            ->latest()
+            ->first();
+    
+            if (!$bookingStadium) {
+                return redirect()->route('booking')->withErrors('กรุณาทำการจองก่อนยืมอุปกรณ์');
+            }
+            
+    
+        $borrow = Borrow::firstOrCreate(
+            [
+                'users_id' => auth()->id(),
+                'booking_stadium_id' => $bookingStadium->id,
+                'borrow_date' => $request->booking_date,
+                'borrow_status' => 'รอการชำระเงิน',
+            ]
+        );
+    
+        $bookingDetails = BookingDetail::where('booking_stadium_id', $bookingStadium->id)
+            ->where('booking_date', $request->booking_date)
+            ->get();
+    
+        foreach ($request->item_id as $index => $itemId) {
+            $borrowQuantity = $request->borrow_quantity[$index];
+            
+            if ($borrowQuantity == 0) {
+                continue;
+            }
+        
+            $item = Item::find($itemId);
+            if (!$item) {
+                return redirect()->back()->withErrors("Item not found: $itemId.");
+            }
+        
+            // คำนวณยอดคงเหลือของอุปกรณ์โดยรวมการยืมในอดีตของผู้ใช้ในรหัสการจองนี้
+            $existingBorrowedByUser = BorrowDetail::where('item_id', $itemId)
+                ->where('users_id', auth()->id())
+                ->where('borrow_id', $borrow->id) // เช็คแค่การยืมในรหัสการจองนี้
+                ->sum('borrow_quantity');
+            
+            $remainingQuantity = $item->item_quantity - $existingBorrowedByUser;
+        
+            // ตรวจสอบว่าจำนวนที่ผู้ใช้ต้องการยืมรวมกันเกินยอดคงเหลือหรือไม่
+            if ($borrowQuantity > $remainingQuantity) {
+                return redirect()->back()->withErrors([
+                    'message' => "จำนวนการยืมเกินยอดคงเหลือ ของ {$item->item_name} ยอดคงเหลือที่สามารถยืมได้ : $remainingQuantity",
+                ]);
+            }
+            
+        
+            // โค้ดการบันทึกข้อมูลการยืม (BorrowDetail) ตามปกติ
+            $timeSlotIds = [];
+            foreach ($bookingDetails as $bookingDetail) {
+                if ($bookingDetail->stadium_id == $request->stadium_id) {
+                    $timeSlotIds[] = $bookingDetail->time_slot_id;
                 }
             }
+        
+            $timeSlotIdsStr = implode(',', $timeSlotIds);
+            $totalPrice = $item->price * $borrowQuantity;
+        
+            $existingDetail = BorrowDetail::where('borrow_id', $borrow->id)
+                ->where('item_id', $itemId)
+                ->where('stadium_id', $request->stadium_id)
+                ->where('borrow_date', $request->booking_date)
+                ->first();
+        
+            if ($existingDetail) {
+                $existingTimeSlots = explode(',', $existingDetail->time_slot_id);
+                $newTimeSlots = array_unique(array_merge($existingTimeSlots, $timeSlotIds));
+                $existingDetail->time_slot_id = implode(',', $newTimeSlots);
+                $existingDetail->borrow_quantity += $borrowQuantity;
+                $existingDetail->borrow_total_price += $totalPrice;
+                $existingDetail->save();
+            } else {
+                BorrowDetail::create([
+                    'stadium_id' => $request->stadium_id,
+                    'borrow_date' => $request->booking_date,
+                    'time_slot_id' => $timeSlotIdsStr,
+                    'item_id' => $itemId,
+                    'borrow_quantity' => $borrowQuantity,
+                    'borrow_total_price' => $totalPrice,
+                    'borrow_total_hour' => 0,
+                    'item_item_type_id' => $item->item_type_id,
+                    'borrow_id' => $borrow->id,
+                    'users_id' => auth()->id(),
+                ]);
+            }
         }
+    
+        return redirect()->back()->with('success', 'ยืมอุปกรณ์สำเร็จ');
     }
-
-    return redirect()->back()->with('success', 'ยืมอุปกรณ์สำเร็จ');
-}
+    
+    
 
 
     
 public function showBookingDetail($id)
 {
     // ค้นหาข้อมูลการจอง
-    $bookingDetail = Booking::find($id);
+    $bookingDetail = BookingStadium::find($id);
      // ค้นหาข้อมูลการยืมอุปกรณ์ที่เกี่ยวข้อง
     $borrowingDetails = Borrow::where('booking_id', $id)->get();
 
@@ -268,6 +280,183 @@ public function destroyBorrow($id)
     $borrow->delete();
 
     return response()->json(['success' => 'ลบการยืมสำเร็จ']);
+}
+
+
+
+public function adminborrow(Request $request)
+{
+    // รับค่าสถานะจาก query string
+    $status = $request->query('status');
+    
+    // สร้างคำสั่ง query
+    $borrowDetailsQuery = BorrowDetail::with('borrow.user', 'item', 'item.itemType', 'stadium');
+    
+    // ถ้ามีการกำหนดสถานะ จะกรองตามสถานะ
+    if ($status) {
+        $borrowDetailsQuery->where('return_status', $status);
+    }
+
+    $borrowDetails = BorrowDetail::where('return_status', '!=', 'ยังไม่ตรวจสอบ')
+    ->with(['borrow.bookingStadium', 'borrow.user', 'item', 'stadium', 'timeSlots'])
+    ->get();
+
+
+    return view('admin-borrow', compact('borrowDetails', 'status'));
+}
+
+
+public function approveBorrow($id)
+{
+    // หา borrow detail ตาม ID ที่ส่งมา
+    $borrowDetail = BorrowDetail::find($id);
+
+    // ตรวจสอบว่าเจอ borrow detail หรือไม่
+    if ($borrowDetail) {
+        // เปลี่ยนสถานะ return_status เป็น "ยืมแล้ว"
+        $borrowDetail->return_status = 'ยืมแล้ว';
+        $borrowDetail->save();
+
+        // ส่งข้อความสถานะกลับไปยัง view
+        return redirect()->back()->with('success', 'สถานะการยืมถูกเปลี่ยนเป็น "ยืมแล้ว" เรียบร้อย');
+    } else {
+        return redirect()->back()->with('error', 'ไม่พบข้อมูลการยืม');
+    }
+}
+
+
+public function returnBorrow($id)
+{
+    // หา borrow detail ตาม ID ที่ส่งมา
+    $borrowDetail = BorrowDetail::find($id);
+
+     // ค้นหาข้อมูลอุปกรณ์ที่เกี่ยวข้อง
+     $item = Item::findOrFail($borrowDetail->item_id); // สมมติว่า item_id คือคอลัมน์ที่เชื่อมโยงกับอุปกรณ์
+
+
+    // ตรวจสอบว่าเจอ borrow detail หรือไม่
+    if ($borrowDetail) {
+        // เปลี่ยนสถานะ return_status เป็น "คืนแล้ว"
+        $borrowDetail->return_status = 'คืนแล้ว';
+        $borrowDetail->save();
+
+        $item->item_quantity += $borrowDetail->borrow_quantity;
+    $item->save();
+
+        // ส่งข้อความสถานะกลับไปยัง view
+        return redirect()->back()->with('success', 'สถานะการยืมถูกเปลี่ยนเป็น "คืนแล้ว" เรียบร้อย');
+    } else {
+        return redirect()->back()->with('error', 'ไม่พบข้อมูลการยืม');
+    }
+}
+
+
+public function repairBorrow(Request $request, $id)
+{
+    // Validate the input for repair note
+    $request->validate([
+        'repair_note' => 'required|string|max:20', // Ensuring it's a string with a max length of 20
+    ]);
+
+    // Find the borrow detail by ID
+    $borrowDetail = BorrowDetail::find($id);
+
+    // Check if the borrow detail exists
+    if ($borrowDetail) {
+        // Change the return_status to "ซ่อม"
+        $borrowDetail->return_status = 'ซ่อม';
+
+        // Save the repair note
+        $borrowDetail->repair_note = $request->repair_note;
+
+        $borrowDetail->save();
+
+        // Send success message back to the view
+        return redirect()->back()->with('success', 'สถานะการยืมถูกเปลี่ยนเป็น "ซ่อม" เรียบร้อย');
+    } else {
+        return redirect()->back()->with('error', 'ไม่พบข้อมูลการยืม');
+    }
+}
+
+public function repairComplete(Request $request, $id)
+{
+    // Validate the input for repair note
+    $request->validate([
+        'repair_note' => 'required|string|max:20', // Ensuring it's a string with a max length of 20
+    ]);
+
+    // Find the borrow detail by ID
+    $borrowDetail = BorrowDetail::find($id);
+
+     // ค้นหาข้อมูลอุปกรณ์ที่เกี่ยวข้อง
+     $item = Item::findOrFail($borrowDetail->item_id); // สมมติว่า item_id คือคอลัมน์ที่เชื่อมโยงกับอุปกรณ์
+
+
+    // Check if the borrow detail exists
+    if ($borrowDetail) {
+        // Change the return_status to "ซ่อมแล้ว"
+        $borrowDetail->return_status = 'ซ่อมแล้ว';
+
+        // Save the repair note
+        $borrowDetail->repair_note = $request->repair_note;
+
+        $borrowDetail->save();
+
+        $item->item_quantity += $borrowDetail->borrow_quantity;
+    $item->save();
+
+        // Send success message back to the view
+        return redirect()->back()->with('success', 'สถานะการยืมถูกเปลี่ยนเป็น "ซ่อมแล้ว" เรียบร้อย');
+    } else {
+        return redirect()->back()->with('error', 'ไม่พบข้อมูลการยืม');
+    }
+}
+
+
+public function searchBorrow(Request $request)
+{
+    $query = BorrowDetail::with(['borrow', 'item', 'stadium', 'item.itemType']);
+
+     // Apply booking stadium ID filter if provided
+     if ($request->filled('booking_stadium_id')) {
+        $query->whereHas('borrow', function ($q) use ($request) {
+            // เช็คว่า booking_stadium_id ใน borrow ตรงกับค่าที่ค้นหา
+            $q->where('booking_stadium_id', $request->booking_stadium_id);
+        });
+    }
+
+    // Apply borrower name filter if provided
+    if ($request->filled('fname')) {
+        $query->whereHas('borrow.user', function ($q) use ($request) {
+            $q->where('fname', 'like', '%' . $request->fname . '%');
+        });
+    
+}
+
+    // Apply borrow date filter if provided
+    if ($request->filled('borrow_date')) {
+        $query->where('borrow_date', $request->borrow_date);
+    }
+
+    // Apply status filter if provided
+    if ($request->filled('status')) {
+        $query->where('return_status', $request->status);
+    }
+
+    $borrowDetails = $query->get();
+    
+ 
+    return view('admin-borrow', compact('borrowDetails'));
+}
+
+public function repairUnable(Request $request, $id)
+{
+    $borrowDetail = BorrowDetail::findOrFail($id);
+    $borrowDetail->return_status = 'ซ่อมไม่ได้';
+    $borrowDetail->repair_note = $request->input('repair_note');
+    $borrowDetail->save();
+
+    return redirect()->back()->with('success', 'สถานะการซ่อมได้รับการอัปเดตเป็น ซ่อมไม่ได้');
 }
 
 

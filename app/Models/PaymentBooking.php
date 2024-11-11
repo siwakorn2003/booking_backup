@@ -26,4 +26,19 @@ class PaymentBooking extends Model
         'bank_name',
         'transfer_datetime',
     ];
+
+     // ความสัมพันธ์กับ BookingStadium
+     public function bookingStadium()
+     {
+         return $this->belongsTo(BookingStadium::class, 'booking_stadium_id');
+     }
+
+     // ใน Model PaymentBooking
+public function borrowDetail()
+{
+    return $this->hasMany(BorrowDetail::class, 'borrow_id', 'borrow_id');
 }
+
+}
+
+
