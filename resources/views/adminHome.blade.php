@@ -85,7 +85,7 @@
                         
                         <div class="row g-4">
                             <!-- การจองสนามรายเดือน -->
-                            <div class="col-lg-8 col-md-10">
+                            <div class="col-lg-4 col-md-6">
                                 <div class="card h-100 shadow-sm">
                                     <div class="card-body">
                                         <h5 class="card-title text-center">จำนวนการจองสนามรายเดือน</h5>
@@ -194,12 +194,12 @@
                             text: 'จำนวนการจอง'
                         },
                         ticks: {
-                            stepSize: 5,
+                            stepSize: 20,
                             callback: function(value) {
-                                return value % 5 === 0 ? value : '';
+                                return value % 20 === 0 ? value : '';
                             }
                         },
-                        max:30
+                        max: 100
                     },
                     x: {
                         title: {

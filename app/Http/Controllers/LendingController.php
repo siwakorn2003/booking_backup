@@ -283,7 +283,7 @@ public function destroyBorrow($id)
 }
 
 
-//ส่วนของแอดมิน ในช่วงของ ยืมคืนซ่อม
+
 public function adminborrow(Request $request)
 {
     // รับค่าสถานะจาก query string

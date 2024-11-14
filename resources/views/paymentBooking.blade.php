@@ -124,7 +124,7 @@ document.getElementById('transfer_slip').addEventListener('change', function(eve
 });
 
 document.addEventListener('DOMContentLoaded', function () {
-    let timeLeft = 100; // ตั้งเวลา 20 วินาที
+    let timeLeft = 50000000000000; // ตั้งเวลา 20 วินาที
     const countdownElement = document.createElement('div');
     countdownElement.className = 'alert alert-warning text-center';
     countdownElement.innerHTML = `เหลือเวลาในการชำระเงิน: ${timeLeft} วินาที`;
