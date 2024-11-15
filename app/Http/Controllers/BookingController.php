@@ -111,7 +111,7 @@ $existingUserBooking = BookingDetail::where('booking_date', $validatedData['date
 ->where('users_id', auth()->id()) // เฉพาะข้อมูลของผู้ใช้งานปัจจุบัน
 ->where('time_slot_id', 'LIKE', '%' . $timeSlotData->id . '%')
 ->whereHas('bookingStadium', function ($query) {
-    $query->whereNotIn('booking_status', ['หมดอายุการชำระเงิน','การชำระเงินถูกปฏิเสธ']); // ข้ามสถานะ "หมดอายุการชำระเงิน"
+    $query->whereNotIn('booking_status', ['หมดอายุการชำระเงิน','การชำระเงินถูกปฏิเสธ']); // ข้ามสถานะ "หมดอายุการชำระเงิน" "การชำระเงินถูกปฏิเสธ"
 })
 ->exists();
 

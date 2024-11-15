@@ -45,7 +45,7 @@
                         @if (Auth::user()->is_admin)
                             <div class="card-body p-3">
                                 <div class="d-flex justify-content-end mb-3">
-                                    <a href="{{ route('repair') }}" class="btn btn-danger me-2">ซ่อม</a>
+                                    {{-- <a href="{{ route('repair') }}" class="btn btn-danger me-2">ซ่อม</a> --}}
                                     <a href="{{ route('add-item') }}" class="btn btn-primary">เพิ่ม</a>
                                 </div>
                             </div>

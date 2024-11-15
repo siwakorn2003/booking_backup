@@ -98,12 +98,23 @@
         </table>
 
         <!-- คำนวณราคารวมทั้งหมดของการยืม -->
-        <h4>รวมราคาการยืม: {{ number_format($borrowingDetails->sum(function($borrow) { return $borrow->details->sum('borrow_total_price'); })) }} บาท</h4>
-    @endif
+        <h4>รวมราคาการยืม: {{ number_format($borrowingDetails->sum(function($borrow) { 
+            return $borrow->details->sum(function($detail) { 
+                return $detail->item->price * $detail->borrow_quantity * count(explode(',', $detail->time_slot_id)); 
+            });
+        })) }} บาท</h4>
+        
+        @endif
 
     <!-- คำนวณราคารวมทั้งหมดของการจองและการยืม -->
-    <h4>ราคารวมทั้งหมด: {{ number_format($groupedBookingDetails->sum(function($group) { return $group->sum('booking_total_price'); }) + $borrowingDetails->sum(function($borrow) { return $borrow->details->sum('borrow_total_price'); })) }} บาท</h4>
-
+    <h4>ราคารวมทั้งหมด: {{ number_format($groupedBookingDetails->sum(function($group) { 
+        return $group->sum('booking_total_price'); 
+    }) + $borrowingDetails->sum(function($borrow) { 
+        return $borrow->details->sum(function($detail) { 
+            return $detail->item->price * $detail->borrow_quantity * count(explode(',', $detail->time_slot_id)); 
+        }); 
+    })) }} บาท</h4>
+    
     <div class="mt-4">
         <a href="{{ route('history.booking') }}" class="btn btn-secondary">ย้อนกลับ</a>
     </div>
